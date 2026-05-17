@@ -9,8 +9,10 @@ local BlackHoleManager = {}
 local active      = {}    -- [id] = { position, spawnedAt, duration }
 local nextSpawnAt = 0
 
+local idCounter = 0
 local function makeId()
-	return tostring(os.time()) .. "_" .. tostring(math.random(1000, 9999))
+	idCounter = idCounter + 1
+	return tostring(os.time()) .. "_" .. idCounter
 end
 
 -- ============================================================

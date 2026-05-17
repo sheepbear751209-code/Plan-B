@@ -13,13 +13,7 @@ local remotes        = ReplicatedStorage:WaitForChild("Remotes", 15)
 local R              = require(ReplicatedStorage:WaitForChild("Constants"))
 local getDiaryHistory = remotes:WaitForChild(R.REMOTES.GET_DIARY_HISTORY)
 
-local MOOD_COLOR = R.MOOD_KEYWORDS and {} or {
-	CALM   = Color3.fromRGB(140, 175, 220),
-	LONELY = Color3.fromRGB(155, 138, 200),
-	HOPE   = Color3.fromRGB(228, 208, 135),
-	CHAOS  = Color3.fromRGB(208, 148, 175),
-}
-MOOD_COLOR = {
+local MOOD_COLOR = {
 	CALM   = Color3.fromRGB(140, 175, 220),
 	LONELY = Color3.fromRGB(155, 138, 200),
 	HOPE   = Color3.fromRGB(228, 208, 135),

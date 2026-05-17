@@ -149,8 +149,8 @@ Players.PlayerAdded:Connect(function(player)
 	-- Deliver oldest unread postcard if any
 	local received = PostcardManager.GetReceived(player.UserId)
 	if #received > 0 then
-		local latest = received[#received]
-		postcardReceived:FireClient(player, { sentence = latest.sentence })
+		local oldest = received[1]
+		postcardReceived:FireClient(player, { sentence = oldest.sentence })
 	end
 end)
 

@@ -149,18 +149,7 @@ eggActivated.OnClientEvent:Connect(function(data)
 	DeerAI.OnWordSubmitted()
 end)
 
-postcardReceived.OnClientEvent:Connect(function(data)
-	local gui = player.PlayerGui:FindFirstChild("PostcardUI")
-	if not gui then return end
-	local frame = gui:FindFirstChild("NotificationFrame")
-	if not frame then return end
-
-	local lbl = frame:FindFirstChild("SentenceLabel")
-	if lbl then lbl.Text = data.sentence or "" end
-
-	frame.Visible = true
-	task.delay(7, function() frame.Visible = false end)
-end)
+-- Postcard notification is handled entirely by PostcardUI.client.lua (showNotification with slide tween)
 
 worldStateUpdate.OnClientEvent:Connect(applyWorldState)
 

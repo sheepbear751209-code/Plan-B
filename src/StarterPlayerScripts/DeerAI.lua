@@ -92,7 +92,7 @@ local function think(dt)
 	-- Priority 1: silent player — drift closer
 	if silent and dist > CLOSE_DIST + 1 then
 		setState("following")
-		local target = pPos + (dPos - pPos).Unit * CLOSE_DIST
+		local target = pPos + (pPos - dPos).Unit * -CLOSE_DIST  -- stop at CLOSE_DIST from player
 		moveTo(target, 4)
 		stateTimer = 3
 		return
@@ -101,7 +101,7 @@ local function think(dt)
 	-- Priority 2: too far — follow
 	if dist > FOLLOW_DIST then
 		setState("following")
-		local target = pPos + (dPos - pPos).Unit * FOLLOW_DIST
+		local target = pPos + (pPos - dPos).Unit * -FOLLOW_DIST  -- stop at FOLLOW_DIST from player
 		moveTo(target, 8)
 		stateTimer = 2
 		return

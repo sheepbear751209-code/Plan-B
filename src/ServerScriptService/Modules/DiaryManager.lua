@@ -97,17 +97,20 @@ function DiaryManager.Submit(userId, rawText)
 	if len < Constants.DIARY.MIN_CHARS then return false, "too_short" end
 	if len > Constants.DIARY.MAX_CHARS then return false, "too_long"  end
 
-	local status = DiaryManager.TodayStatus(userId)
-	if not status.canWrite then return false, "daily_limit" end
-
+	-- Load once and derive status from the same data (avoids double DataStore read)
 	local data    = DiaryManager.Load(userId)
 	local todayStr = today()
 
-	-- Find or create today's entry
 	local entry = nil
 	for _, e in ipairs(data.entries) do
 		if e.date == todayStr then entry = e; break end
 	end
+
+	local todayCount = entry and #entry.sentences or 0
+	if todayCount >= Constants.DIARY.MAX_SENTENCES_PER_DAY then
+		return false, "daily_limit"
+	end
+
 	if not entry then
 		entry = { date = todayStr, sentences = {}, mood = "CALM" }
 		table.insert(data.entries, 1, entry)
@@ -118,14 +121,14 @@ function DiaryManager.Submit(userId, rawText)
 	data.lastEntryDate = todayStr
 	data.totalEntries  = data.totalEntries + 1
 
-	-- Trim beyond retention window (free tier)
+	-- Trim to FREE_RETENTION_DAYS window (free tier)
 	if not data.isPremium then
-		local cutoffTime = os.time() - (Constants.DIARY.FREE_RETENTION_DAYS * 86400)
+		local cutoff = os.time() - (Constants.DIARY.FREE_RETENTION_DAYS * 86400)
 		local kept = {}
 		for _, e in ipairs(data.entries) do
-			-- Keep entries from the last FREE_RETENTION_DAYS days
-			-- Simple heuristic: keep latest 30 entries for prototype
-			if #kept < 30 then table.insert(kept, e) end
+			if #kept < 30 and (e.date >= os.date("%Y-%m-%d", cutoff)) then
+				table.insert(kept, e)
+			end
 		end
 		data.entries = kept
 	end
