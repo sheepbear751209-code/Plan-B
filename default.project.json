@@ -1,0 +1,76 @@
+{
+  "name": "Neverland-AfterTheWords",
+  "tree": {
+    "$className": "DataModel",
+
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "Constants": {
+        "$path": "src/ReplicatedStorage/Constants.lua"
+      }
+    },
+
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+      "GameServer": {
+        "$path": "src/ServerScriptService/GameServer.server.lua"
+      },
+      "Modules": {
+        "$className": "Folder",
+        "DiaryManager": {
+          "$path": "src/ServerScriptService/Modules/DiaryManager.lua"
+        },
+        "WorldStateManager": {
+          "$path": "src/ServerScriptService/Modules/WorldStateManager.lua"
+        },
+        "PostcardManager": {
+          "$path": "src/ServerScriptService/Modules/PostcardManager.lua"
+        },
+        "BlackHoleManager": {
+          "$path": "src/ServerScriptService/Modules/BlackHoleManager.lua"
+        }
+      }
+    },
+
+    "StarterPlayer": {
+      "$className": "StarterPlayer",
+      "StarterPlayerScripts": {
+        "$className": "StarterPlayerScripts",
+        "GameClient": {
+          "$path": "src/StarterPlayerScripts/GameClient.client.lua"
+        },
+        "DeerAI": {
+          "$path": "src/StarterPlayerScripts/DeerAI.lua"
+        },
+        "EggController": {
+          "$path": "src/StarterPlayerScripts/EggController.lua"
+        },
+        "MiniGames": {
+          "$path": "src/StarterPlayerScripts/MiniGames.lua"
+        }
+      }
+    },
+
+    "StarterGui": {
+      "$className": "StarterGui",
+      "DiaryUI": {
+        "$className": "ScreenGui",
+        "DiaryUI": {
+          "$path": "src/StarterGui/DiaryUI/DiaryUI.client.lua"
+        }
+      },
+      "MemoryHouseUI": {
+        "$className": "ScreenGui",
+        "MemoryHouseUI": {
+          "$path": "src/StarterGui/MemoryHouseUI/MemoryHouseUI.client.lua"
+        }
+      },
+      "PostcardUI": {
+        "$className": "ScreenGui",
+        "PostcardUI": {
+          "$path": "src/StarterGui/PostcardUI/PostcardUI.client.lua"
+        }
+      }
+    }
+  }
+}
