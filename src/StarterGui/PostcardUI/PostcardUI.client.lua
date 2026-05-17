@@ -45,7 +45,7 @@ notifTitle.BackgroundTransparency = 1
 notifTitle.Text                  = "某位夢語者寄來了一張明信片"
 notifTitle.TextColor3            = Color3.fromRGB(148, 144, 200)
 notifTitle.TextSize              = 11
-notifTitle.Font                  = Enum.Font.GothamLight
+notifTitle.Font                  = Enum.Font.Gotham
 notifTitle.TextXAlignment        = Enum.TextXAlignment.Left
 notifTitle.Parent                = notifFrame
 
@@ -57,7 +57,7 @@ notifSentence.BackgroundTransparency = 1
 notifSentence.Text                 = ""
 notifSentence.TextColor3           = Color3.fromRGB(208, 205, 238)
 notifSentence.TextSize             = 14
-notifSentence.Font                 = Enum.Font.GothamLight
+notifSentence.Font                 = Enum.Font.Gotham
 notifSentence.TextXAlignment       = Enum.TextXAlignment.Left
 notifSentence.TextWrapped          = true
 notifSentence.Parent               = notifFrame
@@ -99,7 +99,7 @@ sendTitle.BackgroundTransparency = 1
 sendTitle.Text                  = "寄出一張明信片"
 sendTitle.TextColor3            = Color3.fromRGB(185, 180, 225)
 sendTitle.TextSize              = 18
-sendTitle.Font                  = Enum.Font.GothamLight
+sendTitle.Font                  = Enum.Font.Gotham
 sendTitle.TextXAlignment        = Enum.TextXAlignment.Left
 sendTitle.Parent                = sendPanel
 
@@ -110,7 +110,7 @@ sendSub.BackgroundTransparency = 1
 sendSub.Text                  = "選擇一句，匿名寄給某位夢語者。"
 sendSub.TextColor3            = Color3.fromRGB(95, 92, 135)
 sendSub.TextSize              = 13
-sendSub.Font                  = Enum.Font.GothamLight
+sendSub.Font                  = Enum.Font.Gotham
 sendSub.TextXAlignment        = Enum.TextXAlignment.Left
 sendSub.Parent                = sendPanel
 
@@ -121,7 +121,7 @@ sendClose.BackgroundTransparency = 1
 sendClose.Text                  = "✕"
 sendClose.TextColor3            = Color3.fromRGB(110, 108, 150)
 sendClose.TextSize              = 18
-sendClose.Font                  = Enum.Font.GothamLight
+sendClose.Font                  = Enum.Font.Gotham
 sendClose.Parent                = sendPanel
 
 local sentScroll = Instance.new("ScrollingFrame")
@@ -143,7 +143,7 @@ confirmBtn.BorderSizePixel        = 0
 confirmBtn.Text                   = "寄出"
 confirmBtn.TextColor3             = Color3.fromRGB(218, 214, 252)
 confirmBtn.TextSize               = 16
-confirmBtn.Font                   = Enum.Font.GothamLight
+confirmBtn.Font                   = Enum.Font.Gotham
 confirmBtn.Parent                 = sendPanel
 Instance.new("UICorner", confirmBtn).CornerRadius = UDim.new(0, 10)
 
@@ -161,7 +161,7 @@ for i, sentence in ipairs(C.POSTCARDS) do
 	btn.Text                 = sentence
 	btn.TextColor3           = Color3.fromRGB(188, 185, 222)
 	btn.TextSize             = 13
-	btn.Font                 = Enum.Font.GothamLight
+	btn.Font                 = Enum.Font.Gotham
 	btn.TextXAlignment       = Enum.TextXAlignment.Left
 	btn.TextWrapped          = true
 	btn.Parent               = sentScroll

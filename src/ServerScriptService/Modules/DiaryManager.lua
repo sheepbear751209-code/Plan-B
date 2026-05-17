@@ -89,7 +89,8 @@ function DiaryManager.TodayStatus(userId)
 end
 
 -- Returns ok (bool), payload (entry | error string)
-function DiaryManager.Submit(userId, rawText)
+-- worldSnapshot: optional table { rain, bloom, darkness, lake, wind } captured before submission
+function DiaryManager.Submit(userId, rawText, worldSnapshot)
 	-- Validate
 	if type(rawText) ~= "string" then return false, "invalid" end
 	local text = rawText:match("^%s*(.-)%s*$")
@@ -112,8 +113,18 @@ function DiaryManager.Submit(userId, rawText)
 	end
 
 	if not entry then
-		entry = { date = todayStr, sentences = {}, mood = "CALM" }
+		entry = {
+			date          = todayStr,
+			sentences     = {},
+			mood          = "CALM",
+			worldSnapshot = worldSnapshot or nil,
+		}
 		table.insert(data.entries, 1, entry)
+	end
+
+	-- Store snapshot on first sentence of the day (captures the world as it was when player arrived)
+	if not entry.worldSnapshot and worldSnapshot then
+		entry.worldSnapshot = worldSnapshot
 	end
 
 	table.insert(entry.sentences, text)

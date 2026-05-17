@@ -48,7 +48,7 @@ titleLbl.BackgroundTransparency = 1
 titleLbl.Text                  = "記憶居所"
 titleLbl.TextColor3            = Color3.fromRGB(185, 180, 225)
 titleLbl.TextSize              = 20
-titleLbl.Font                  = Enum.Font.GothamLight
+titleLbl.Font                  = Enum.Font.Gotham
 titleLbl.TextXAlignment        = Enum.TextXAlignment.Left
 titleLbl.Parent                = bg
 
@@ -59,7 +59,7 @@ subtitleLbl.BackgroundTransparency = 1
 subtitleLbl.Text                  = "你留下的每一句話，都在這裡。"
 subtitleLbl.TextColor3            = Color3.fromRGB(95, 92, 135)
 subtitleLbl.TextSize              = 13
-subtitleLbl.Font                  = Enum.Font.GothamLight
+subtitleLbl.Font                  = Enum.Font.Gotham
 subtitleLbl.TextXAlignment        = Enum.TextXAlignment.Left
 subtitleLbl.Parent                = bg
 
@@ -70,7 +70,7 @@ closeBtn.BackgroundTransparency = 1
 closeBtn.Text                  = "✕"
 closeBtn.TextColor3            = Color3.fromRGB(110, 108, 150)
 closeBtn.TextSize              = 18
-closeBtn.Font                  = Enum.Font.GothamLight
+closeBtn.Font                  = Enum.Font.Gotham
 closeBtn.Parent                = bg
 
 local scroll = Instance.new("ScrollingFrame")
@@ -91,9 +91,23 @@ layout.Padding   = UDim.new(0, 10)
 -- Entry card builder
 -- ============================================================
 
+-- Build a compact world-weather string from a snapshot
+local function weatherText(snapshot)
+	if not snapshot then return "" end
+	local parts = {}
+	if snapshot.rain     and snapshot.rain     > 50 then table.insert(parts, "雨") end
+	if snapshot.darkness and snapshot.darkness > 55 then table.insert(parts, "暗") end
+	if snapshot.bloom    and snapshot.bloom    > 40 then table.insert(parts, "花") end
+	if snapshot.wind     and snapshot.wind     > 55 then table.insert(parts, "風") end
+	if snapshot.lake     and snapshot.lake     > 60 then table.insert(parts, "湖") end
+	if #parts == 0 then return "平穩" end
+	return table.concat(parts, " · ")
+end
+
 local function buildCard(entry, order)
 	local sentenceCount = entry.sentences and #entry.sentences or 0
-	local cardHeight    = 48 + sentenceCount * 20
+	local hasWeather    = entry.worldSnapshot ~= nil
+	local cardHeight    = (hasWeather and 68 or 48) + sentenceCount * 20
 
 	local card = Instance.new("Frame")
 	card.LayoutOrder          = order
@@ -125,12 +139,27 @@ local function buildCard(entry, order)
 	meta.Text                  = (entry.date or "未知日期") .. "  ·  " .. (MOOD_NAME[mood] or "平靜")
 	meta.TextColor3            = moodColor
 	meta.TextSize              = 12
-	meta.Font                  = Enum.Font.GothamLight
+	meta.Font                  = Enum.Font.Gotham
 	meta.TextXAlignment        = Enum.TextXAlignment.Left
 	meta.Parent                = card
 
-	-- Sentences
+	-- World weather at time of writing
 	local yOff = 28
+	if hasWeather then
+		local weatherLbl = Instance.new("TextLabel")
+		weatherLbl.Size                  = UDim2.new(1, -24, 0, 16)
+		weatherLbl.Position              = UDim2.new(0, 20, 0, yOff)
+		weatherLbl.BackgroundTransparency = 1
+		weatherLbl.Text                  = "當時世界：" .. weatherText(entry.worldSnapshot)
+		weatherLbl.TextColor3            = Color3.fromRGB(95, 130, 150)
+		weatherLbl.TextSize              = 11
+		weatherLbl.Font                  = Enum.Font.Gotham
+		weatherLbl.TextXAlignment        = Enum.TextXAlignment.Left
+		weatherLbl.Parent                = card
+		yOff = yOff + 20
+	end
+
+	-- Sentences
 	for _, s in ipairs(entry.sentences or {}) do
 		local lbl = Instance.new("TextLabel")
 		lbl.Size                  = UDim2.new(1, -24, 0, 18)
@@ -139,7 +168,7 @@ local function buildCard(entry, order)
 		lbl.Text                  = s
 		lbl.TextColor3            = Color3.fromRGB(185, 183, 215)
 		lbl.TextSize              = 13
-		lbl.Font                  = Enum.Font.GothamLight
+		lbl.Font                  = Enum.Font.Gotham
 		lbl.TextXAlignment        = Enum.TextXAlignment.Left
 		lbl.TextTruncate          = Enum.TextTruncate.AtEnd
 		lbl.Parent                = card
@@ -168,7 +197,7 @@ local function loadHistory()
 		empty.Text                  = "這裡還沒有記憶。\n回到草原，留下你的第一句話。"
 		empty.TextColor3            = Color3.fromRGB(90, 88, 128)
 		empty.TextSize              = 14
-		empty.Font                  = Enum.Font.GothamLight
+		empty.Font                  = Enum.Font.Gotham
 		empty.TextXAlignment        = Enum.TextXAlignment.Center
 		empty.TextYAlignment        = Enum.TextYAlignment.Center
 		empty.Parent                = scroll

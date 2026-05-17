@@ -90,8 +90,11 @@ function WorldStateManager.UpdateFromSentences(userId, sentences)
 	if inf.WIND   > 0 then state.wind     = clamp(state.wind     + inf.WIND   * w + fuzz) end
 	-- LIGHT counters darkness
 	if inf.LIGHT  > 0 then state.darkness = clamp(state.darkness - inf.LIGHT  * w + fuzz) end
-	-- ALONE makes the world a little quieter (lower wind)
-	if inf.ALONE  > 0 then state.wind     = clamp(state.wind     - inf.ALONE  * (w * 0.5)) end
+	-- ALONE makes the world quieter and darker
+	if inf.ALONE  > 0 then
+		state.wind     = clamp(state.wind     - inf.ALONE * (w * 0.5))
+		state.darkness = clamp(state.darkness + inf.ALONE * (w * 0.6) + fuzz)
+	end
 
 	-- Slow drift toward baseline — world "breathes" back over time
 	local d = W.DRIFT_RATE

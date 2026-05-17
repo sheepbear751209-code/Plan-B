@@ -102,6 +102,53 @@ local function emitParticles(count)
 	if p then p:Emit(count or 8) end
 end
 
+-- Reveal pattern on egg surface: fades in a Decal named "Pattern" if present,
+-- otherwise creates a brief ring of glowing orbs around the egg as a fallback.
+local function revealPattern(color)
+	local e = getEgg()
+	if not e then return end
+
+	-- Try Decal approach first (artist-placed asset)
+	local decal = e:FindFirstChild("Pattern")
+	if decal and decal:IsA("Decal") then
+		decal.Transparency = 1
+		TweenService:Create(decal, TweenInfo.new(1.8, Enum.EasingStyle.Sine), {
+			Transparency = 0,
+		}):Play()
+		task.delay(6, function()
+			TweenService:Create(decal, TweenInfo.new(2.4, Enum.EasingStyle.Sine), {
+				Transparency = 1,
+			}):Play()
+		end)
+		return
+	end
+
+	-- Fallback: spawn small glowing orbs that orbit then fade
+	local count = 5
+	local radius = (e.Size.Magnitude * 0.5) + 0.8
+	for i = 1, count do
+		local angle = (i / count) * math.pi * 2
+		local offset = Vector3.new(math.cos(angle) * radius, 0, math.sin(angle) * radius)
+		local orb = Instance.new("Part")
+		orb.Size         = Vector3.new(0.18, 0.18, 0.18)
+		orb.Position     = e.Position + offset
+		orb.Anchored     = true
+		orb.CanCollide   = false
+		orb.CastShadow   = false
+		orb.Material     = Enum.Material.Neon
+		orb.Color        = color
+		orb.Transparency = 0.1
+		orb.Shape        = Enum.PartType.Ball
+		orb.Parent       = workspace
+
+		TweenService:Create(orb, TweenInfo.new(3.5, Enum.EasingStyle.Sine), {
+			Position     = e.Position + offset * 1.6 + Vector3.new(0, 0.6, 0),
+			Transparency = 1,
+		}):Play()
+		Debris:AddItem(orb, 3.8)
+	end
+end
+
 -- ============================================================
 -- Public API
 -- ============================================================
@@ -145,6 +192,7 @@ function EggController.OnWordReceived(data)
 	pulseGlow(color)
 	wobble()
 	emitParticles(12)
+	revealPattern(color)
 
 	-- Gradually shift egg colour toward mood colour
 	local e = getEgg()

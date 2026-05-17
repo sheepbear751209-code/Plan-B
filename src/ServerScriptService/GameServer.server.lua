@@ -54,18 +54,17 @@ local canWriteToday     = makeFunction(R.CAN_WRITE_TODAY)
 
 submitDiary.OnServerEvent:Connect(function(player, sentence)
 	local uid = player.UserId
-	local ok, result = DiaryManager.Submit(uid, sentence)
+	-- Capture world state before the submission so we can store it with the entry
+	local snapshotBefore = WorldStateManager.GetState(uid)
+	local ok, result = DiaryManager.Submit(uid, sentence, snapshotBefore)
 
 	if ok then
-		-- Push world state change back to the player
 		local newState = WorldStateManager.UpdateFromSentences(uid, { sentence })
 		worldStateUpdate:FireClient(player, newState)
 		diaryResponse:FireClient(player, { success = true, entry = result })
 
-		-- Egg reacts
 		eggActivated:FireClient(player, { mood = result.mood })
 
-		-- Add this world state to anonymous showcase pool
 		task.defer(function()
 			WorldStateManager.AddToShowcase(newState)
 		end)

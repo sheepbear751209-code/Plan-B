@@ -35,7 +35,7 @@ openBtn.BorderSizePixel       = 0
 openBtn.Text                  = "留下話語"
 openBtn.TextColor3            = Color3.fromRGB(210, 208, 248)
 openBtn.TextSize              = 16
-openBtn.Font                  = Enum.Font.GothamLight
+openBtn.Font                  = Enum.Font.Gotham
 openBtn.Parent                = sg
 Instance.new("UICorner", openBtn).CornerRadius = UDim.new(0, 22)
 
@@ -59,7 +59,7 @@ heading.BackgroundTransparency = 1
 heading.Text                 = "這裡的生命，會回應留下的話語。"
 heading.TextColor3           = Color3.fromRGB(170, 168, 215)
 heading.TextSize             = 14
-heading.Font                 = Enum.Font.GothamLight
+heading.Font                 = Enum.Font.Gotham
 heading.TextXAlignment       = Enum.TextXAlignment.Left
 heading.Parent               = panel
 
@@ -72,7 +72,7 @@ countLbl.BackgroundTransparency = 1
 countLbl.Text                 = "今日：0 / 5"
 countLbl.TextColor3           = Color3.fromRGB(105, 105, 148)
 countLbl.TextSize             = 13
-countLbl.Font                 = Enum.Font.GothamLight
+countLbl.Font                 = Enum.Font.Gotham
 countLbl.TextXAlignment       = Enum.TextXAlignment.Left
 countLbl.Parent               = panel
 
@@ -89,7 +89,7 @@ input.PlaceholderText        = "今天，你想留下什麼…"
 input.PlaceholderColor3      = Color3.fromRGB(75, 72, 108)
 input.TextColor3             = Color3.fromRGB(210, 208, 238)
 input.TextSize               = 15
-input.Font                   = Enum.Font.GothamLight
+input.Font                   = Enum.Font.Gotham
 input.MultiLine              = true
 input.ClearTextOnFocus       = false
 input.TextWrapped            = true
@@ -110,7 +110,7 @@ charLbl.BackgroundTransparency = 1
 charLbl.Text                 = "0 / 80"
 charLbl.TextColor3           = Color3.fromRGB(75, 72, 108)
 charLbl.TextSize             = 12
-charLbl.Font                 = Enum.Font.GothamLight
+charLbl.Font                 = Enum.Font.Gotham
 charLbl.TextXAlignment       = Enum.TextXAlignment.Right
 charLbl.Parent               = panel
 
@@ -125,7 +125,7 @@ submitBtn.BorderSizePixel        = 0
 submitBtn.Text                   = "留下"
 submitBtn.TextColor3             = Color3.fromRGB(218, 214, 252)
 submitBtn.TextSize               = 16
-submitBtn.Font                   = Enum.Font.GothamLight
+submitBtn.Font                   = Enum.Font.Gotham
 submitBtn.Parent                 = panel
 Instance.new("UICorner", submitBtn).CornerRadius = UDim.new(0, 10)
 
@@ -138,7 +138,7 @@ statusLbl.BackgroundTransparency = 1
 statusLbl.Text                 = ""
 statusLbl.TextColor3           = Color3.fromRGB(148, 200, 158)
 statusLbl.TextSize             = 13
-statusLbl.Font                 = Enum.Font.GothamLight
+statusLbl.Font                 = Enum.Font.Gotham
 statusLbl.TextXAlignment       = Enum.TextXAlignment.Center
 statusLbl.Parent               = panel
 
@@ -150,7 +150,7 @@ sectionLbl.BackgroundTransparency = 1
 sectionLbl.Text                 = "今日所留"
 sectionLbl.TextColor3           = Color3.fromRGB(90, 88, 128)
 sectionLbl.TextSize             = 12
-sectionLbl.Font                 = Enum.Font.GothamLight
+sectionLbl.Font                 = Enum.Font.Gotham
 sectionLbl.TextXAlignment       = Enum.TextXAlignment.Left
 sectionLbl.Parent               = panel
 
@@ -174,7 +174,7 @@ closeBtn.BackgroundTransparency = 1
 closeBtn.Text                 = "✕"
 closeBtn.TextColor3           = Color3.fromRGB(110, 108, 150)
 closeBtn.TextSize             = 16
-closeBtn.Font                 = Enum.Font.GothamLight
+closeBtn.Font                 = Enum.Font.Gotham
 closeBtn.Parent               = panel
 
 -- ============================================================
@@ -212,7 +212,7 @@ local function rebuildList(sentences)
 		lbl.Text                 = i .. ". " .. s
 		lbl.TextColor3           = Color3.fromRGB(140, 138, 178)
 		lbl.TextSize             = 12
-		lbl.Font                 = Enum.Font.GothamLight
+		lbl.Font                 = Enum.Font.Gotham
 		lbl.TextXAlignment       = Enum.TextXAlignment.Left
 		lbl.TextTruncate         = Enum.TextTruncate.AtEnd
 		lbl.Parent               = listFrame
@@ -237,7 +237,7 @@ end
 input:GetPropertyChangedSignal("Text"):Connect(function()
 	local len = #input.Text
 	charLbl.Text = len .. " / 80"
-	charLbl.TextColor3 = len > 80
+	charLbl.TextColor3 = (len > 80 or (len > 0 and len < 40))
 		and Color3.fromRGB(215, 110, 110)
 		or  Color3.fromRGB(75, 72, 108)
 end)
@@ -245,7 +245,7 @@ end)
 submitBtn.MouseButton1Click:Connect(function()
 	if submitting then return end
 	local text = input.Text:match("^%s*(.-)%s*$")
-	if #text < 10 then showStatus("再多說一點點…", true); return end
+	if #text < 40 then showStatus("再多說一些…（至少約20個字）", true); return end
 	if #text > 80 then showStatus("試著精簡一些。", true); return end
 
 	submitting = true

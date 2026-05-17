@@ -8,8 +8,8 @@ local Constants = {}
 -- ============================================================
 Constants.DIARY = {
 	MAX_SENTENCES_PER_DAY = 5,
-	MIN_SENTENCES_PER_DAY = 1,
-	MIN_CHARS             = 10,  -- ~5 Chinese characters
+	MIN_SENTENCES_PER_DAY = 3,
+	MIN_CHARS             = 40,  -- ~20 Chinese characters
 	MAX_CHARS             = 80,  -- ~40 Chinese characters
 	FREE_RETENTION_DAYS   = 30,
 }
