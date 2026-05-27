@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>意見調查問卷</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ── 頁首 ── -->
+  <div class="header-card">
+    <h1>📋 意見調查問卷</h1>
+    <p>感謝您抽空填寫！本問卷約需 3 分鐘，所有資料僅供內部參考。</p>
+  </div>
+
+  <!-- ── 進度條 ── -->
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+
+  <!-- ── 表單卡片 ── -->
+  <div class="form-card">
+
+    <!-- 成功畫面（提交後顯示） -->
+    <div class="success-screen" id="successScreen">
+      <div class="check-icon">✅</div>
+      <h2>感謝您的填寫！</h2>
+      <p>您的回覆已成功送出，我們會盡快整理結果。</p>
+    </div>
+
+    <!-- 問卷主體 -->
+    <form id="surveyForm" novalidate>
+
+      <!-- ════════════════════════════
+           第一區：基本資料
+      ════════════════════════════ -->
+      <div class="question-block" data-required>
+        <label>1. 您的姓名 <span class="required">*</span></label>
+        <input type="text" name="name" placeholder="請輸入您的姓名" autocomplete="name" />
+        <span class="error-msg">此欄位為必填</span>
+      </div>
+
+      <div class="question-block" data-required>
+        <label>2. 電子郵件 <span class="required">*</span></label>
+        <input type="email" name="email" placeholder="example@mail.com" autocomplete="email" />
+        <span class="error-msg">請輸入有效的電子郵件</span>
+      </div>
+
+      <div class="question-block">
+        <label>3. 聯絡電話</label>
+        <input type="tel" name="phone" placeholder="0912-345-678" autocomplete="tel" />
+      </div>
+
+      <hr class="divider" />
+
+      <!-- ════════════════════════════
+           第二區：單選題
+      ════════════════════════════ -->
+      <div class="question-block" data-required>
+        <label>4. 您如何得知本活動？ <span class="required">*</span></label>
+        <div class="option-group" id="q4">
+          <label class="option-item">
+            <input type="radio" name="source" value="社群媒體" /> 社群媒體（FB / IG / LINE）
+          </label>
+          <label class="option-item">
+            <input type="radio" name="source" value="朋友推薦" /> 朋友推薦
+          </label>
+          <label class="option-item">
+            <input type="radio" name="source" value="官方網站" /> 官方網站
+          </label>
+          <label class="option-item">
+            <input type="radio" name="source" value="其他" /> 其他
+          </label>
+        </div>
+        <span class="error-msg">請選擇一項</span>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- ════════════════════════════
+           第三區：多選題
+      ════════════════════════════ -->
+      <div class="question-block">
+        <label>5. 您對哪些主題感興趣？（可複選）</label>
+        <div class="option-group">
+          <label class="option-item">
+            <input type="checkbox" name="interest" value="技術分享" /> 技術分享
+          </label>
+          <label class="option-item">
+            <input type="checkbox" name="interest" value="產品設計" /> 產品設計
+          </label>
+          <label class="option-item">
+            <input type="checkbox" name="interest" value="商業經營" /> 商業經營
+          </label>
+          <label class="option-item">
+            <input type="checkbox" name="interest" value="其他" /> 其他
+          </label>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- ════════════════════════════
+           第四區：評分量尺
+      ════════════════════════════ -->
+      <div class="question-block" data-required>
+        <label>6. 整體滿意度 <span class="required">*</span></label>
+        <p class="hint">請在 1（非常不滿意）到 5（非常滿意）之間選擇</p>
+        <div class="rating-scale" id="ratingScale">
+          <!-- 由 JS 動態產生 -->
+        </div>
+        <div class="rating-labels">
+          <span>非常不滿意</span><span>非常滿意</span>
+        </div>
+        <input type="hidden" name="satisfaction" id="satisfactionValue" />
+        <span class="error-msg">請選擇一個分數</span>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- ════════════════════════════
+           第五區：開放式文字
+      ════════════════════════════ -->
+      <div class="question-block">
+        <label>7. 您有什麼建議或想法？</label>
+        <p class="hint">歡迎自由填寫任何意見，我們珍視每一份回饋。</p>
+        <textarea name="suggestion" id="suggestionText" maxlength="500"
+                  placeholder="請輸入您的建議…"></textarea>
+        <div class="char-count"><span id="charCount">0</span> / 500</div>
+      </div>
+
+      <!-- ════════════════════════════
+           Hidden：防垃圾郵件 honeypot
+           （保持空白，機器人會填）
+      ════════════════════════════ -->
+      <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off" />
+
+      <!-- 提交按鈕 -->
+      <button type="submit" class="submit-btn" id="submitBtn">
+        送出問卷 →
+      </button>
+
+    </form>
+  </div>
+
+  <p class="footer">
+    本問卷由 <a href="https://formspree.io" target="_blank" style="color:var(--primary)">Formspree</a> 安全傳輸 ·
+    填寫前請確認您已閱讀隱私政策
+  </p>
+</div>
+
+<script>
+// ======================================================
+//  ⚙️  設定區：把下面這行換成你的 Formspree endpoint
+//     申請方式見 README.md
+// ======================================================
+const FORMSPREE_ENDPOINT = 'https://formspree.io/f/YOUR_FORM_ID';
+
+// ── 評分按鈕動態產生 ──
+const ratingScale = document.getElementById('ratingScale');
+const ratingValue = document.getElementById('satisfactionValue');
+
+[1, 2, 3, 4, 5].forEach(n => {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'rating-btn';
+  btn.textContent = n;
+  btn.addEventListener('click', () => {
+    ratingScale.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    ratingValue.value = n;
+    updateProgress();
+  });
+  ratingScale.appendChild(btn);
+});
+
+// ── 選項高亮 ──
+document.querySelectorAll('.option-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const input = item.querySelector('input');
+    if (input.type === 'radio') {
+      item.closest('.option-group')
+          .querySelectorAll('.option-item')
+          .forEach(i => i.classList.remove('selected'));
+    }
+    // checkbox: toggle
+    setTimeout(() => {
+      item.classList.toggle('selected', input.checked);
+    }, 0);
+  });
+});
+
+// ── 字數統計 ──
+const textarea  = document.getElementById('suggestionText');
+const charCount = document.getElementById('charCount');
+textarea.addEventListener('input', () => {
+  charCount.textContent = textarea.value.length;
+  updateProgress();
+});
+
+// ── 進度條 ──
+function countFilled() {
+  let filled = 0;
+  const total = 5; // 計算有填的必填 + 選填題
+  if (document.querySelector('[name="name"]').value.trim()) filled++;
+  if (document.querySelector('[name="email"]').value.trim()) filled++;
+  if (document.querySelector('[name="source"]:checked'))     filled++;
+  if (ratingValue.value)                                      filled++;
+  if (textarea.value.trim())                                  filled++;
+  return (filled / total) * 100;
+}
+
+function updateProgress() {
+  document.getElementById('progressFill').style.width = countFilled() + '%';
+}
+
+document.querySelectorAll('input, textarea, select').forEach(el => {
+  el.addEventListener('input',  updateProgress);
+  el.addEventListener('change', updateProgress);
+});
+
+// ── 表單提交 ──
+document.getElementById('surveyForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  // 基本驗證
+  let valid = true;
+
+  document.querySelectorAll('.question-block[data-required]').forEach(block => {
+    block.classList.remove('has-error');
+    const input    = block.querySelector('input[type="text"], input[type="email"], input[type="number"], textarea');
+    const radio    = block.querySelector('input[type="radio"]');
+    const hidden   = block.querySelector('input[type="hidden"]');
+
+    if (input && !input.value.trim()) {
+      block.classList.add('has-error'); valid = false;
+    } else if (radio && !block.querySelector('input[type="radio"]:checked')) {
+      block.classList.add('has-error'); valid = false;
+    } else if (hidden && !hidden.value) {
+      block.classList.add('has-error'); valid = false;
+    }
+
+    // Email 格式
+    const emailInput = block.querySelector('input[type="email"]');
+    if (emailInput && emailInput.value.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value)) {
+      block.classList.add('has-error'); valid = false;
+    }
+  });
+
+  if (!valid) {
+    document.querySelector('.has-error')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  // 收集多選資料
+  const form = e.target;
+  const data = new FormData(form);
+
+  // 多選框轉成逗號分隔字串
+  const interests = [...form.querySelectorAll('[name="interest"]:checked')].map(c => c.value);
+  data.delete('interest');
+  data.append('interest', interests.join('、') || '（未選）');
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = '送出中…';
+
+  try {
+    const res = await fetch(FORMSPREE_ENDPOINT, {
+      method:  'POST',
+      body:    data,
+      headers: { 'Accept': 'application/json' }
+    });
+
+    if (res.ok) {
+      form.style.display = 'none';
+      document.getElementById('successScreen').style.display = 'block';
+      document.getElementById('progressFill').style.width = '100%';
+    } else {
+      const json = await res.json().catch(() => ({}));
+      alert('送出失敗：' + (json.error || '請稍後再試。'));
+      btn.disabled = false;
+      btn.textContent = '送出問卷 →';
+    }
+  } catch {
+    alert('網路錯誤，請確認連線後再試。');
+    btn.disabled = false;
+    btn.textContent = '送出問卷 →';
+  }
+});
+</script>
+
+</body>
+</html>

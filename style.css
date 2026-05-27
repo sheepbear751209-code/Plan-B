@@ -1,0 +1,283 @@
+/* ===== 基礎重置 ===== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --primary:    #4f46e5;
+  --primary-dk: #3730a3;
+  --success:    #16a34a;
+  --bg:         #f8fafc;
+  --card:       #ffffff;
+  --border:     #e2e8f0;
+  --text:       #1e293b;
+  --muted:      #64748b;
+  --radius:     12px;
+  --shadow:     0 4px 24px rgba(0,0,0,.08);
+}
+
+body {
+  font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 2rem 1rem 4rem;
+  line-height: 1.6;
+}
+
+/* ===== 版型容器 ===== */
+.container {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+/* ===== 頁首卡片 ===== */
+.header-card {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dk));
+  color: #fff;
+  border-radius: var(--radius) var(--radius) 0 0;
+  padding: 2.5rem 2rem 2rem;
+}
+
+.header-card h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: .5rem;
+}
+
+.header-card p {
+  opacity: .85;
+  font-size: .95rem;
+}
+
+/* ===== 進度條 ===== */
+.progress-bar {
+  height: 4px;
+  background: rgba(255,255,255,.3);
+}
+
+.progress-fill {
+  height: 100%;
+  background: #fff;
+  transition: width .4s ease;
+  width: 0%;
+}
+
+/* ===== 表單卡片 ===== */
+.form-card {
+  background: var(--card);
+  border-radius: 0 0 var(--radius) var(--radius);
+  box-shadow: var(--shadow);
+  padding: 2rem;
+}
+
+/* ===== 每個問題區塊 ===== */
+.question-block {
+  margin-bottom: 1.75rem;
+  animation: fadeIn .3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.question-block label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: .5rem;
+  font-size: .95rem;
+}
+
+.question-block label .required {
+  color: #ef4444;
+  margin-left: 4px;
+}
+
+.question-block .hint {
+  font-size: .82rem;
+  color: var(--muted);
+  margin-bottom: .5rem;
+}
+
+/* ===== 輸入框 ===== */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="number"],
+select,
+textarea {
+  width: 100%;
+  padding: .65rem .9rem;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: .95rem;
+  color: var(--text);
+  background: #fff;
+  transition: border-color .2s, box-shadow .2s;
+  font-family: inherit;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79,70,229,.15);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* ===== 單/多選按鈕 ===== */
+.option-group {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+
+.option-item {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  padding: .65rem .9rem;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color .2s, background .2s;
+  user-select: none;
+}
+
+.option-item:hover {
+  border-color: var(--primary);
+  background: #f5f3ff;
+}
+
+.option-item input[type="radio"],
+.option-item input[type="checkbox"] {
+  width: auto;
+  accent-color: var(--primary);
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.option-item.selected {
+  border-color: var(--primary);
+  background: #ede9fe;
+}
+
+/* ===== 評分量尺 ===== */
+.rating-scale {
+  display: flex;
+  gap: .4rem;
+  flex-wrap: wrap;
+}
+
+.rating-btn {
+  width: 44px;
+  height: 44px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  font-size: .9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rating-btn:hover  { border-color: var(--primary); color: var(--primary); }
+.rating-btn.active { border-color: var(--primary); background: var(--primary); color: #fff; }
+
+.rating-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: .78rem;
+  color: var(--muted);
+  margin-top: .35rem;
+}
+
+/* ===== 分隔線 ===== */
+.divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1.5rem 0;
+}
+
+/* ===== 提交按鈕 ===== */
+.submit-btn {
+  width: 100%;
+  padding: .85rem;
+  background: var(--primary);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background .2s, transform .1s;
+  letter-spacing: .02em;
+}
+
+.submit-btn:hover   { background: var(--primary-dk); }
+.submit-btn:active  { transform: scale(.98); }
+.submit-btn:disabled { opacity: .6; cursor: not-allowed; }
+
+/* ===== 成功畫面 ===== */
+.success-screen {
+  display: none;
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.success-screen .check-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.success-screen h2 {
+  font-size: 1.5rem;
+  margin-bottom: .75rem;
+  color: var(--success);
+}
+
+.success-screen p {
+  color: var(--muted);
+}
+
+/* ===== 錯誤提示 ===== */
+.error-msg {
+  font-size: .82rem;
+  color: #ef4444;
+  margin-top: .35rem;
+  display: none;
+}
+
+.has-error input,
+.has-error select,
+.has-error textarea {
+  border-color: #ef4444;
+}
+
+.has-error .error-msg { display: block; }
+
+/* ===== 字數統計 ===== */
+.char-count {
+  font-size: .78rem;
+  color: var(--muted);
+  text-align: right;
+  margin-top: .25rem;
+}
+
+/* ===== 頁尾 ===== */
+.footer {
+  text-align: center;
+  margin-top: 2rem;
+  font-size: .8rem;
+  color: var(--muted);
+}
