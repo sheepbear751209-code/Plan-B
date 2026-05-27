@@ -14,7 +14,13 @@
     /* 條件式區塊動畫 */
     .conditional-section { animation: fadeIn .3s ease; }
     .conditional-section[hidden] { display: none !important; }
+    /* reCAPTCHA 間距 */
+    .captcha-wrap { margin-bottom: 1.5rem; }
+    .captcha-wrap .error-msg { display: none; margin-top: .4rem; }
+    .captcha-wrap.has-error .error-msg { display: block; }
   </style>
+  <!-- ★ Google reCAPTCHA v2 ★ -->
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body>
 
@@ -313,6 +319,18 @@
       <input type="text" name="_gotcha" style="display:none"
              tabindex="-1" autocomplete="off" />
 
+      <!-- reCAPTCHA 驗證 -->
+      <!-- ★ 正式上線前請將 data-sitekey 換成你自己的 Site Key ★
+           申請網址：https://www.google.com/recaptcha/admin
+           目前使用 Google 官方測試金鑰（畫面顯示正常但不具防護效果）
+      -->
+      <div class="captcha-wrap" id="captchaWrap">
+        <div class="g-recaptcha"
+             data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI">
+        </div>
+        <span class="error-msg">請先完成「我不是機器人」驗證</span>
+      </div>
+
       <!-- 送出 -->
       <button type="submit" class="submit-btn" id="submitBtn">送出申請 →</button>
 
@@ -436,6 +454,16 @@ document.getElementById('surveyForm').addEventListener('submit', async (e) => {
     return;
   }
 
+  // reCAPTCHA 驗證
+  const captchaWrap = document.getElementById('captchaWrap');
+  const captchaToken = grecaptcha.getResponse();
+  if (!captchaToken) {
+    captchaWrap.classList.add('has-error');
+    captchaWrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  captchaWrap.classList.remove('has-error');
+
   // 收集資料
   const form        = e.target;
   const caseType    = form.querySelector('[name="source"]:checked')?.value || null;
@@ -480,6 +508,7 @@ document.getElementById('surveyForm').addEventListener('submit', async (e) => {
     alert('送出失敗，請稍後再試。');
     btn.disabled = false;
     btn.textContent = '送出申請 →';
+    grecaptcha.reset(); // 送出失敗時重置 CAPTCHA，讓使用者重新勾選
   }
 });
 </script>
