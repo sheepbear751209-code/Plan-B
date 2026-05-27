@@ -106,10 +106,8 @@
                 填寫時間 <span class="sort-arrow" id="sort-submitted_at">↕</span>
               </th>
               <th>姓名</th>
-              <th>Email</th>
-              <th class="sortable" onclick="toggleSort('satisfaction')">
-                滿意度 <span class="sort-arrow" id="sort-satisfaction">↕</span>
-              </th>
+              <th>手機號碼</th>
+              <th>案件類別</th>
               <th>狀態</th>
               <th>操作</th>
             </tr>
@@ -134,8 +132,8 @@
             <tr>
               <th>結案時間</th>
               <th>填寫者姓名</th>
-              <th>Email</th>
-              <th>滿意度</th>
+              <th>手機號碼</th>
+              <th>案件類別</th>
               <th>處理人員</th>
               <th>處理結果摘要</th>
               <th>操作</th>
@@ -423,7 +421,7 @@ function renderSubmissions() {
       <td>${fmt(s.submitted_at)}</td>
       <td>${esc(s.name)}</td>
       <td class="cell-muted">${esc(s.email)}</td>
-      <td>${stars(s.satisfaction)}</td>
+      <td>${esc(s.source || '–')}</td>
       <td><span class="badge badge-${statusCls(s.status)}">${s.status}</span></td>
       <td>
         <button class="btn-sm"
@@ -446,19 +444,18 @@ function openDetail(id) {
       <h4>基本資料</h4>
       <dl class="detail-dl">
         <dt>姓名</dt>    <dd>${esc(s.name)}</dd>
-        <dt>Email</dt>   <dd>${esc(s.email)}</dd>
-        <dt>電話</dt>    <dd>${s.phone || '–'}</dd>
+        <dt>手機號碼</dt><dd>${esc(s.email)}</dd>
+        <dt>駐地單位</dt><dd>${s.phone || '–'}</dd>
         <dt>填寫時間</dt><dd>${fmt(s.submitted_at)}</dd>
       </dl>
     </div>
 
     <div class="detail-section">
-      <h4>問卷內容</h4>
+      <h4>申請案件資料</h4>
       <dl class="detail-dl">
-        <dt>來源管道</dt>    <dd>${s.source    || '–'}</dd>
-        <dt>感興趣主題</dt>  <dd>${s.interests || '–'}</dd>
-        <dt>整體滿意度</dt>  <dd>${s.satisfaction ? s.satisfaction + ' / 5　' + stars(s.satisfaction) : '–'}</dd>
-        <dt>建議與想法</dt>  <dd class="pre-wrap">${s.suggestion ? esc(s.suggestion) : '–'}</dd>
+        <dt>案件類別</dt>      <dd>${s.source    || '–'}</dd>
+        <dt>現場狀況勾選</dt>  <dd class="pre-wrap">${s.interests ? esc(s.interests).replace(/、/g, '\n') : '–'}</dd>
+        <dt>年籍資料及描述</dt><dd class="pre-wrap">${s.suggestion ? esc(s.suggestion) : '–'}</dd>
       </dl>
     </div>
 
@@ -617,7 +614,7 @@ function renderCaseRecords() {
       <td>${fmt(r.closed_at)}</td>
       <td>${esc(r.snapshot_name)}</td>
       <td class="cell-muted">${esc(r.snapshot_email)}</td>
-      <td>${stars(r.snapshot_satisfaction)}</td>
+      <td>${esc(r.snapshot_source || '–')}</td>
       <td>${esc(r.handler_name)}</td>
       <td class="cell-clamp">${esc(r.handling_result)}</td>
       <td>
@@ -664,13 +661,12 @@ function openCaseDetail(id) {
 
       <dl class="detail-dl">
         <dt>姓名</dt>      <dd>${esc(r.snapshot_name)}</dd>
-        <dt>Email</dt>     <dd>${esc(r.snapshot_email)}</dd>
-        <dt>電話</dt>      <dd>${r.snapshot_phone || '–'}</dd>
-        <dt>填寫時間</dt>  <dd>${fmt(r.snapshot_submitted_at)}</dd>
-        <dt>來源管道</dt>  <dd>${r.snapshot_source    || '–'}</dd>
-        <dt>感興趣主題</dt><dd>${r.snapshot_interests  || '–'}</dd>
-        <dt>整體滿意度</dt><dd>${r.snapshot_satisfaction ? r.snapshot_satisfaction + ' / 5　' + stars(r.snapshot_satisfaction) : '–'}</dd>
-        <dt>建議與想法</dt><dd class="pre-wrap">${r.snapshot_suggestion ? esc(r.snapshot_suggestion) : '–'}</dd>
+        <dt>手機號碼</dt>    <dd>${esc(r.snapshot_email)}</dd>
+        <dt>駐地單位</dt>    <dd>${r.snapshot_phone || '–'}</dd>
+        <dt>填寫時間</dt>    <dd>${fmt(r.snapshot_submitted_at)}</dd>
+        <dt>案件類別</dt>    <dd>${r.snapshot_source    || '–'}</dd>
+        <dt>現場狀況勾選</dt><dd class="pre-wrap">${r.snapshot_interests ? esc(r.snapshot_interests).replace(/、/g, '\n') : '–'}</dd>
+        <dt>年籍資料及描述</dt><dd class="pre-wrap">${r.snapshot_suggestion ? esc(r.snapshot_suggestion) : '–'}</dd>
       </dl>
 
     </div>

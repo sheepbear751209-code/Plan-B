@@ -3,10 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>意見調查問卷</title>
+  <title>申請鑑識勘察採證表</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+  <style>
+    /* 條件式區塊動畫 */
+    .conditional-section { animation: fadeIn .3s ease; }
+    .conditional-section[hidden] { display: none !important; }
+  </style>
 </head>
 <body>
 
@@ -14,8 +19,8 @@
 
   <!-- ── 頁首 ── -->
   <div class="header-card">
-    <h1>📋 意見調查問卷</h1>
-    <p>感謝您抽空填寫！本問卷約需 3 分鐘，所有資料僅供內部參考。</p>
+    <h1>🔍 申請鑑識勘察採證表</h1>
+    <p>請如實填寫現場狀況，以利安排鑑識人員出勤。標示 * 號為必填欄位。</p>
   </div>
 
   <!-- ── 進度條 ── -->
@@ -26,52 +31,52 @@
   <!-- ── 表單卡片 ── -->
   <div class="form-card">
 
-    <!-- 成功畫面（提交後顯示） -->
+    <!-- 送出成功畫面 -->
     <div class="success-screen" id="successScreen">
       <div class="check-icon">✅</div>
-      <h2>感謝您的填寫！</h2>
-      <p>您的回覆已成功送出，我們會盡快整理結果。</p>
+      <h2>申請已送出！</h2>
+      <p>您的申請已成功送出，鑑識人員將確認後回覆。</p>
     </div>
 
     <!-- 問卷主體 -->
     <form id="surveyForm" novalidate>
 
-      <!-- ════════════════════════════
-           第一區：基本資料
-      ════════════════════════════ -->
+      <!-- 1. 申請人姓名 -->
       <div class="question-block" data-required>
-        <label>1. 您的姓名 <span class="required">*</span></label>
-        <input type="text" name="name" placeholder="請輸入您的姓名" autocomplete="name" />
+        <label>1. 申請人姓名 <span class="required">*</span></label>
+        <input type="text" name="name" placeholder="請輸入姓名" autocomplete="name" />
         <span class="error-msg">此欄位為必填</span>
       </div>
 
+      <!-- 2. 手機號碼 -->
       <div class="question-block" data-required>
-        <label>2. 電子郵件 <span class="required">*</span></label>
-        <input type="email" name="email" placeholder="example@mail.com" autocomplete="email" />
-        <span class="error-msg">請輸入有效的電子郵件</span>
+        <label>2. 手機號碼 <span class="required">*</span></label>
+        <input type="tel" name="phone_num" placeholder="例：0912-345-678" />
+        <span class="error-msg">此欄位為必填</span>
       </div>
 
-      <div class="question-block">
-        <label>3. 聯絡電話</label>
-        <input type="tel" name="phone" placeholder="0912-345-678" autocomplete="tel" />
+      <!-- 3. 駐地單位 -->
+      <div class="question-block" data-required>
+        <label>3. 駐地單位 <span class="required">*</span></label>
+        <input type="text" name="unit"
+               placeholder="例：大安分局大安所、信義分局信義隊" />
+        <span class="error-msg">此欄位為必填</span>
       </div>
 
       <hr class="divider" />
 
-      <!-- ════════════════════════════
-           第二區：單選題
-      ════════════════════════════ -->
+      <!-- 4. 案件類別 -->
       <div class="question-block" data-required>
-        <label>4. 您如何得知本活動？ <span class="required">*</span></label>
-        <div class="option-group" id="q4">
+        <label>4. 鑑識支援案件類別 <span class="required">*</span></label>
+        <div class="option-group" id="q4group">
           <label class="option-item">
-            <input type="radio" name="source" value="社群媒體" /> 社群媒體（FB / IG / LINE）
+            <input type="radio" name="source" value="死亡案" /> 死亡案
           </label>
           <label class="option-item">
-            <input type="radio" name="source" value="朋友推薦" /> 朋友推薦
+            <input type="radio" name="source" value="聚眾鬥毆" /> 聚眾鬥毆
           </label>
           <label class="option-item">
-            <input type="radio" name="source" value="官方網站" /> 官方網站
+            <input type="radio" name="source" value="竊盜案" /> 竊盜案
           </label>
           <label class="option-item">
             <input type="radio" name="source" value="其他" /> 其他
@@ -83,137 +88,308 @@
       <hr class="divider" />
 
       <!-- ════════════════════════════
-           第三區：多選題
+           條件式題目：死亡案
       ════════════════════════════ -->
-      <div class="question-block">
-        <label>5. 您對哪些主題感興趣？（可複選）</label>
-        <div class="option-group">
-          <label class="option-item">
-            <input type="checkbox" name="interest" value="技術分享" /> 技術分享
-          </label>
-          <label class="option-item">
-            <input type="checkbox" name="interest" value="產品設計" /> 產品設計
-          </label>
-          <label class="option-item">
-            <input type="checkbox" name="interest" value="商業經營" /> 商業經營
-          </label>
-          <label class="option-item">
-            <input type="checkbox" name="interest" value="其他" /> 其他
-          </label>
-        </div>
-      </div>
+      <div id="cond-death" class="conditional-section" hidden>
 
-      <hr class="divider" />
+        <div class="question-block" data-required>
+          <label>5. 死亡案現場狀況請勾選 <span class="required">*</span></label>
+          <p class="hint">請勾選所有符合現場狀況的項目（至少一項）</p>
+          <div class="option-group">
+            <label class="option-item">
+              <input type="checkbox" name="interests" value="死者與家人同住" />
+              死者與家人同住
+            </label>
+            <label class="option-item">
+              <input type="checkbox" name="interests" value="死者由家人發現" />
+              死者由家人發現
+            </label>
+            <label class="option-item">
+              <input type="checkbox" name="interests" value="死者身分可以確認" />
+              死者身分可以確認
+            </label>
+            <label class="option-item">
+              <input type="checkbox" name="interests" value="死者有病史（現場有藥袋、處方籤）" />
+              死者有病史（現場有藥袋、處方籤）
+            </label>
+            <label class="option-item">
+              <input type="checkbox" name="interests" value="現場擺設整齊，未發現打鬥痕跡" />
+              現場擺設整齊，未發現打鬥痕跡
+            </label>
+            <label class="option-item">
+              <input type="checkbox" name="interests" value="死者大體（臉部、頭部、頸部、四肢）未發現明顯傷勢" />
+              死者大體（臉部、頭部、頸部、四肢）未發現明顯傷勢
+            </label>
+            <label class="option-item">
+              <input type="checkbox" name="interests" value="現場未發現明顯血跡" />
+              現場未發現明顯血跡
+            </label>
+            <label class="option-item">
+              <input type="checkbox" name="interests" value="家屬對死者死因初步沒有意見" />
+              家屬對死者死因初步沒有意見
+            </label>
+          </div>
+          <span class="error-msg">請至少勾選一項</span>
+        </div>
+
+        <div class="question-block" data-required>
+          <label>6. 死者年籍資料 <span class="required">*</span></label>
+          <p class="hint">請填寫姓名、出生日期、證件號碼</p>
+          <textarea id="q6-death" name="q6"
+                    placeholder="姓名：
+出生日期：
+證件號碼：" rows="4"></textarea>
+          <span class="error-msg">此欄位為必填</span>
+        </div>
+
+        <div class="question-block">
+          <label>7. 是否有其他現場情形需要描述？</label>
+          <textarea id="q7-death" name="q7"
+                    placeholder="請填寫其他需補充說明之事項…" rows="3"></textarea>
+        </div>
+
+      </div><!-- /cond-death -->
+
 
       <!-- ════════════════════════════
-           第四區：評分量尺
+           條件式題目：聚眾鬥毆
       ════════════════════════════ -->
-      <div class="question-block" data-required>
-        <label>6. 整體滿意度 <span class="required">*</span></label>
-        <p class="hint">請在 1（非常不滿意）到 5（非常滿意）之間選擇</p>
-        <div class="rating-scale" id="ratingScale">
-          <!-- 由 JS 動態產生 -->
-        </div>
-        <div class="rating-labels">
-          <span>非常不滿意</span><span>非常滿意</span>
-        </div>
-        <input type="hidden" name="satisfaction" id="satisfactionValue" />
-        <span class="error-msg">請選擇一個分數</span>
-      </div>
+      <div id="cond-fight" class="conditional-section" hidden>
 
-      <hr class="divider" />
+        <div class="question-block" data-required>
+          <label>5. 聚眾鬥毆案現場狀況請勾選 <span class="required">*</span></label>
+          <p class="hint">請勾選所有符合現場狀況的項目（至少一項）</p>
+          <div class="option-group">
+            <label class="option-item">
+              <input type="checkbox" name="interests" value="現場傷者已經送醫治療" />
+              現場傷者已經送醫治療
+            </label>
+            <label class="option-item">
+              <input type="checkbox" name="interests" value="現場傷者可能有生命危險" />
+              現場傷者可能有生命危險
+            </label>
+            <label class="option-item">
+              <input type="checkbox" name="interests" value="現場傷者意識清楚，傷勢已包紮，可製作筆錄" />
+              現場傷者意識清楚，傷勢已包紮，可製作筆錄
+            </label>
+            <label class="option-item">
+              <input type="checkbox" name="interests" value="現場兇手已經抓到，並已坦承犯案" />
+              現場兇手已經抓到，並已坦承犯案
+            </label>
+            <label class="option-item">
+              <input type="checkbox" name="interests" value="現場案發經過有監視器影像" />
+              現場案發經過有監視器影像
+            </label>
+            <label class="option-item">
+              <input type="checkbox" name="interests" value="現場案發經過有第三人目擊，可以提供案發經過" />
+              現場案發經過有第三人目擊，可以提供案發經過
+            </label>
+            <label class="option-item">
+              <input type="checkbox" name="interests" value="現場凶器已經找到，並妥善保管" />
+              現場凶器已經找到，並妥善保管
+            </label>
+          </div>
+          <span class="error-msg">請至少勾選一項</span>
+        </div>
+
+        <div class="question-block" data-required>
+          <label>6. 傷者年籍資料 <span class="required">*</span></label>
+          <p class="hint">請填寫姓名、出生日期、證件號碼</p>
+          <textarea id="q6-fight" name="q6"
+                    placeholder="姓名：
+出生日期：
+證件號碼：" rows="4"></textarea>
+          <span class="error-msg">此欄位為必填</span>
+        </div>
+
+        <div class="question-block">
+          <label>7. 是否有其他現場情形需要描述？</label>
+          <textarea id="q7-fight" name="q7"
+                    placeholder="請填寫其他需補充說明之事項…" rows="3"></textarea>
+        </div>
+
+      </div><!-- /cond-fight -->
+
 
       <!-- ════════════════════════════
-           第五區：開放式文字
+           條件式題目：竊盜案
       ════════════════════════════ -->
-      <div class="question-block">
-        <label>7. 您有什麼建議或想法？</label>
-        <p class="hint">歡迎自由填寫任何意見，我們珍視每一份回饋。</p>
-        <textarea name="suggestion" id="suggestionText" maxlength="500"
-                  placeholder="請輸入您的建議…"></textarea>
-        <div class="char-count"><span id="charCount">0</span> / 500</div>
-      </div>
+      <div id="cond-theft" class="conditional-section" hidden>
+
+        <div class="question-block" data-required>
+          <label>5. 竊盜案現場狀況請勾選 <span class="required">*</span></label>
+          <p class="hint">請勾選所有符合現場狀況的項目（至少一項）</p>
+          <div class="option-group">
+            <label class="option-item">
+              <input type="checkbox" name="interests" value="本案現場特殊，無法保留至翌日" />
+              本案現場特殊，無法保留至翌日
+            </label>
+            <label class="option-item">
+              <input type="checkbox" name="interests" value="本案被害人有緊急事由，無法等候至翌日" />
+              本案被害人有緊急事由，無法等候至翌日
+            </label>
+            <label class="option-item">
+              <input type="checkbox" name="interests" value="本案被害人為長官請託或其他特殊人士" />
+              本案被害人為長官請託或其他特殊人士
+            </label>
+          </div>
+          <span class="error-msg">請至少勾選一項</span>
+        </div>
+
+        <div class="question-block" data-required>
+          <label>6. 被害人年籍資料 <span class="required">*</span></label>
+          <p class="hint">請填寫姓名、出生日期、手機號碼</p>
+          <textarea id="q6-theft" name="q6"
+                    placeholder="姓名：
+出生日期：
+手機號碼：" rows="4"></textarea>
+          <span class="error-msg">此欄位為必填</span>
+        </div>
+
+        <div class="question-block" data-required>
+          <label>7. 竊盜案情描述 <span class="required">*</span></label>
+          <p class="hint">請描述為何種竊盜案，以及需要鑑識採證之情形</p>
+          <textarea id="q7-theft" name="q7"
+                    placeholder="請填寫案件概況及採證需求…" rows="4"></textarea>
+          <span class="error-msg">此欄位為必填</span>
+        </div>
+
+      </div><!-- /cond-theft -->
+
 
       <!-- ════════════════════════════
-           Hidden：防垃圾郵件 honeypot
-           （保持空白，機器人會填）
+           條件式題目：其他
       ════════════════════════════ -->
-      <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off" />
+      <div id="cond-other" class="conditional-section" hidden>
 
-      <!-- 提交按鈕 -->
-      <button type="submit" class="submit-btn" id="submitBtn">
-        送出問卷 →
-      </button>
+        <div class="question-block" data-required>
+          <label>5. 其他案件現場狀況請勾選 <span class="required">*</span></label>
+          <p class="hint">請勾選所有符合現場狀況的項目（至少一項）</p>
+          <div class="option-group">
+            <label class="option-item">
+              <input type="checkbox" name="interests" value="本案為重大刑案（兇殺、強盜、槍擊或其他重大刑案）" />
+              本案為重大刑案（兇殺、強盜、槍擊或其他重大刑案）
+            </label>
+            <label class="option-item">
+              <input type="checkbox" name="interests" value="本案被害人受傷或死亡" />
+              本案被害人受傷或死亡
+            </label>
+            <label class="option-item">
+              <input type="checkbox" name="interests" value="本案現場為戶外，難以保留" />
+              本案現場為戶外，難以保留
+            </label>
+            <label class="option-item">
+              <input type="checkbox" name="interests" value="本案現場為室內，目前已封鎖現場" />
+              本案現場為室內，目前已封鎖現場
+            </label>
+          </div>
+          <span class="error-msg">請至少勾選一項</span>
+        </div>
+
+        <div class="question-block" data-required>
+          <label>6. 被害人年籍資料 <span class="required">*</span></label>
+          <p class="hint">請填寫姓名、出生日期、手機號碼</p>
+          <textarea id="q6-other" name="q6"
+                    placeholder="姓名：
+出生日期：
+手機號碼：" rows="4"></textarea>
+          <span class="error-msg">此欄位為必填</span>
+        </div>
+
+        <div class="question-block" data-required>
+          <label>7. 案件情況描述 <span class="required">*</span></label>
+          <p class="hint">請簡述為何種案件，以及需要鑑識採證之情形</p>
+          <textarea id="q7-other" name="q7"
+                    placeholder="請填寫案件概況及採證需求…" rows="4"></textarea>
+          <span class="error-msg">此欄位為必填</span>
+        </div>
+
+      </div><!-- /cond-other -->
+
+      <!-- Honeypot（防機器人） -->
+      <input type="text" name="_gotcha" style="display:none"
+             tabindex="-1" autocomplete="off" />
+
+      <!-- 送出 -->
+      <button type="submit" class="submit-btn" id="submitBtn">送出申請 →</button>
 
     </form>
   </div>
 
-  <p class="footer">
-    資料安全傳輸，填寫內容僅供內部參考使用
-  </p>
+  <p class="footer">資料安全傳輸，填寫內容僅供內部參考使用</p>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ======================================================
-// ⚙️ 設定區 — 從 Supabase 控制台複製貼上（見 README.md）
+// ⚙️ 設定區
 // ======================================================
 const SUPABASE_URL      = 'https://ljwdflbqalrchraejjjt.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxqd2RmbGJxYWxyY2hyYWVqamp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NTgwNDYsImV4cCI6MjA5NTQzNDA0Nn0.if3F3xB3HUwDCuCbZqK8JR-zyLIeAGT4bDHUoIeGZfc';
 
 const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ── 評分按鈕動態產生 ──
-const ratingScale = document.getElementById('ratingScale');
-const ratingValue = document.getElementById('satisfactionValue');
+// ── 條件式區塊對應表 ──
+const COND_MAP = {
+  '死亡案':  'cond-death',
+  '聚眾鬥毆': 'cond-fight',
+  '竊盜案':  'cond-theft',
+  '其他':    'cond-other',
+};
 
-[1, 2, 3, 4, 5].forEach(n => {
-  const btn = document.createElement('button');
-  btn.type = 'button';
-  btn.className = 'rating-btn';
-  btn.textContent = n;
-  btn.addEventListener('click', () => {
-    ratingScale.querySelectorAll('.rating-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    ratingValue.value = n;
+// ── Q4 切換條件式區塊 ──
+document.querySelectorAll('[name="source"]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    // 隱藏所有並清空
+    Object.values(COND_MAP).forEach(id => {
+      const el = document.getElementById(id);
+      el.hidden = true;
+      el.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        cb.checked = false;
+      });
+      el.querySelectorAll('.option-item').forEach(i => i.classList.remove('selected'));
+      el.querySelectorAll('textarea').forEach(ta => ta.value = '');
+      el.querySelectorAll('.question-block').forEach(b => b.classList.remove('has-error'));
+    });
+    // 顯示對應區塊
+    const targetId = COND_MAP[radio.value];
+    if (targetId) document.getElementById(targetId).hidden = false;
     updateProgress();
   });
-  ratingScale.appendChild(btn);
 });
 
-// ── 選項高亮 ──
-document.querySelectorAll('.option-item').forEach(item => {
-  item.addEventListener('click', () => {
-    const input = item.querySelector('input');
-    if (input.type === 'radio') {
-      item.closest('.option-group')
-          .querySelectorAll('.option-item')
-          .forEach(i => i.classList.remove('selected'));
-    }
-    // checkbox: toggle
-    setTimeout(() => {
-      item.classList.toggle('selected', input.checked);
-    }, 0);
-  });
-});
-
-// ── 字數統計 ──
-const textarea  = document.getElementById('suggestionText');
-const charCount = document.getElementById('charCount');
-textarea.addEventListener('input', () => {
-  charCount.textContent = textarea.value.length;
+// ── 選項高亮（單選 + 複選通用） ──
+document.addEventListener('change', (e) => {
+  const input = e.target;
+  if (input.type !== 'radio' && input.type !== 'checkbox') return;
+  const item = input.closest('.option-item');
+  if (!item) return;
+  if (input.type === 'radio') {
+    item.closest('.option-group')
+        ?.querySelectorAll('.option-item')
+        .forEach(i => i.classList.remove('selected'));
+  }
+  item.classList.toggle('selected', input.checked);
   updateProgress();
 });
 
 // ── 進度條 ──
 function countFilled() {
   let filled = 0;
-  const total = 5; // 計算有填的必填 + 選填題
-  if (document.querySelector('[name="name"]').value.trim()) filled++;
-  if (document.querySelector('[name="email"]').value.trim()) filled++;
-  if (document.querySelector('[name="source"]:checked'))     filled++;
-  if (ratingValue.value)                                      filled++;
-  if (textarea.value.trim())                                  filled++;
+  let total  = 4; // Q1–Q4 四題基本必填
+
+  if (document.querySelector('[name="name"]').value.trim())      filled++;
+  if (document.querySelector('[name="phone_num"]').value.trim()) filled++;
+  if (document.querySelector('[name="unit"]').value.trim())      filled++;
+  if (document.querySelector('[name="source"]:checked'))         filled++;
+
+  const activeSection = document.querySelector('.conditional-section:not([hidden])');
+  if (activeSection) {
+    total += 2; // Q5 勾選 + Q6 文字
+    if (activeSection.querySelector('input[type="checkbox"]:checked')) filled++;
+    const q6 = activeSection.querySelector('[id^="q6-"]');
+    if (q6?.value.trim()) filled++;
+  }
   return (filled / total) * 100;
 }
 
@@ -221,60 +397,70 @@ function updateProgress() {
   document.getElementById('progressFill').style.width = countFilled() + '%';
 }
 
-document.querySelectorAll('input, textarea, select').forEach(el => {
-  el.addEventListener('input',  updateProgress);
-  el.addEventListener('change', updateProgress);
-});
+document.querySelectorAll('input:not([type="radio"]):not([type="checkbox"]), textarea')
+  .forEach(el => el.addEventListener('input', updateProgress));
 
-// ── 表單提交 ──
+// ── 表單驗證 & 送出 ──
 document.getElementById('surveyForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  // 基本驗證
+  // Honeypot
+  if (document.querySelector('[name="_gotcha"]').value !== '') return;
+
+  // 驗證：跳過隱藏區塊內的題目
   let valid = true;
-
   document.querySelectorAll('.question-block[data-required]').forEach(block => {
-    block.classList.remove('has-error');
-    const input    = block.querySelector('input[type="text"], input[type="email"], input[type="number"], textarea');
-    const radio    = block.querySelector('input[type="radio"]');
-    const hidden   = block.querySelector('input[type="hidden"]');
+    if (block.closest('[hidden]')) return; // 在隱藏區塊內 → 跳過
 
-    if (input && !input.value.trim()) {
+    block.classList.remove('has-error');
+
+    const textInput = block.querySelector('input[type="text"], input[type="tel"], textarea');
+    const radio     = block.querySelector('input[type="radio"]');
+    const checkbox  = block.querySelector('input[type="checkbox"]');
+
+    if (textInput && !textInput.value.trim()) {
       block.classList.add('has-error'); valid = false;
     } else if (radio && !block.querySelector('input[type="radio"]:checked')) {
       block.classList.add('has-error'); valid = false;
-    } else if (hidden && !hidden.value) {
-      block.classList.add('has-error'); valid = false;
-    }
-
-    // Email 格式
-    const emailInput = block.querySelector('input[type="email"]');
-    if (emailInput && emailInput.value.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value)) {
+    } else if (checkbox && !block.querySelector('input[type="checkbox"]:checked')) {
       block.classList.add('has-error'); valid = false;
     }
   });
 
   if (!valid) {
-    document.querySelector('.has-error')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    document.querySelector('.has-error')
+      ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     return;
   }
 
-  // Honeypot 檢查（機器人攔截）
-  if (document.querySelector('[name="_gotcha"]').value !== '') return;
-
   // 收集資料
-  const form = e.target;
-  const interests = [...form.querySelectorAll('[name="interest"]:checked')]
-    .map(c => c.value).join('、') || null;
+  const form        = e.target;
+  const caseType    = form.querySelector('[name="source"]:checked')?.value || null;
+  const activeSection = document.querySelector('.conditional-section:not([hidden])');
+
+  // 現場狀況勾選
+  const interests = activeSection
+    ? [...activeSection.querySelectorAll('input[type="checkbox"]:checked')]
+        .map(cb => cb.value).join('、') || null
+    : null;
+
+  // Q6 年籍資料、Q7 案情描述
+  const q6 = activeSection?.querySelector('[id^="q6-"]')?.value.trim() || null;
+  const q7 = activeSection?.querySelector('[id^="q7-"]')?.value.trim() || null;
+
+  // 組合 suggestion：Q6 + Q7
+  let suggestion = q6;
+  if (q7) suggestion = (suggestion ? suggestion + '\n\n' : '') +
+                       '【其他情形 / 案情描述】\n' + q7;
 
   const payload = {
     name:         form.querySelector('[name="name"]').value.trim(),
-    email:        form.querySelector('[name="email"]').value.trim(),
-    phone:        form.querySelector('[name="phone"]').value.trim()         || null,
-    source:       form.querySelector('[name="source"]:checked')?.value      || null,
+    email:        form.querySelector('[name="phone_num"]').value.trim(), // 手機→email欄
+    phone:        form.querySelector('[name="unit"]').value.trim(),      // 單位→phone欄
+    source:       caseType,
     interests:    interests,
-    satisfaction: ratingValue.value ? parseInt(ratingValue.value, 10)       : null,
-    suggestion:   textarea.value.trim()                                     || null,
+    satisfaction: null,
+    suggestion:   suggestion || null,
   };
 
   const btn = document.getElementById('submitBtn');
@@ -290,7 +476,7 @@ document.getElementById('surveyForm').addEventListener('submit', async (e) => {
   } else {
     alert('送出失敗，請稍後再試。');
     btn.disabled = false;
-    btn.textContent = '送出問卷 →';
+    btn.textContent = '送出申請 →';
   }
 });
 </script>
