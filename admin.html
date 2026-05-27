@@ -523,10 +523,18 @@ async function saveNote(id) {
 // ════════════════════════════════════════════════════════
 // 結案 Modal
 // ════════════════════════════════════════════════════════
+// 關閉所有 Modal（避免疊加）
+function closeAllModals() {
+  document.getElementById('closeCaseModal').hidden = true;
+  document.getElementById('caseDetailModal').hidden = true;
+  S.pendingId = null;
+}
+
 function showCloseCaseModal(id) {
+  closeAllModals();
   S.pendingId = id;
-  document.getElementById('handlerName').value    = '';
-  document.getElementById('handlingResult').value = '';
+  document.getElementById('handlerName').value     = '';
+  document.getElementById('handlingResult').value  = '';
   document.getElementById('caseSummaryText').value = '';
   document.getElementById('closeCaseModal').hidden = false;
 }
@@ -626,6 +634,7 @@ function renderCaseRecords() {
 
 // ── 結案詳情 Modal ──
 function openCaseDetail(id) {
+  closeAllModals();
   const r = S.caseRecords.find(x => x.id === id);
   if (!r) return;
 
