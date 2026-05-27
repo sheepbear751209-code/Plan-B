@@ -253,15 +253,22 @@ const S = {
 // AUTH
 // ════════════════════════════════════════════════════════
 async function initAuth() {
+  // 頁面載入時，一律先顯示登入頁
+  showLoginPage();
+
   const { data: { session } } = await sb.auth.getSession();
-  if (session) {
+
+  if (session?.user?.email) {
+    // 只有當 session 帶有有效的 email 才自動進入後台
     S.user = session.user;
     showApp();
-  } else {
-    showLoginPage();
+  } else if (session) {
+    // session 存在但沒有 email（匿名 session），強制登出
+    await sb.auth.signOut();
   }
+
   sb.auth.onAuthStateChange((event, session) => {
-    if (event === 'SIGNED_IN') {
+    if (event === 'SIGNED_IN' && session?.user?.email) {
       S.user = session.user;
       showApp();
     } else if (event === 'SIGNED_OUT') {
