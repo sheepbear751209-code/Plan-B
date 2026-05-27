@@ -5,6 +5,9 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* 確保 HTML hidden 屬性不被 CSS display 規則覆蓋 */
+[hidden] { display: none !important; }
+
 :root {
   --primary:     #4f46e5;
   --primary-dk:  #3730a3;
