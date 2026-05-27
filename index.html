@@ -149,17 +149,19 @@
   </div>
 
   <p class="footer">
-    本問卷由 <a href="https://formspree.io" target="_blank" style="color:var(--primary)">Formspree</a> 安全傳輸 ·
-    填寫前請確認您已閱讀隱私政策
+    資料安全傳輸，填寫內容僅供內部參考使用
   </p>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ======================================================
-//  ⚙️  設定區：把下面這行換成你的 Formspree endpoint
-//     申請方式見 README.md
+// ⚙️ 設定區 — 從 Supabase 控制台複製貼上（見 README.md）
 // ======================================================
-const FORMSPREE_ENDPOINT = 'https://formspree.io/f/YOUR_FORM_ID';
+const SUPABASE_URL      = 'https://YOUR_PROJECT.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY';
+
+const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ── 評分按鈕動態產生 ──
 const ratingScale = document.getElementById('ratingScale');
@@ -257,38 +259,36 @@ document.getElementById('surveyForm').addEventListener('submit', async (e) => {
     return;
   }
 
-  // 收集多選資料
-  const form = e.target;
-  const data = new FormData(form);
+  // Honeypot 檢查（機器人攔截）
+  if (document.querySelector('[name="_gotcha"]').value !== '') return;
 
-  // 多選框轉成逗號分隔字串
-  const interests = [...form.querySelectorAll('[name="interest"]:checked')].map(c => c.value);
-  data.delete('interest');
-  data.append('interest', interests.join('、') || '（未選）');
+  // 收集資料
+  const form = e.target;
+  const interests = [...form.querySelectorAll('[name="interest"]:checked')]
+    .map(c => c.value).join('、') || null;
+
+  const payload = {
+    name:         form.querySelector('[name="name"]').value.trim(),
+    email:        form.querySelector('[name="email"]').value.trim(),
+    phone:        form.querySelector('[name="phone"]').value.trim()         || null,
+    source:       form.querySelector('[name="source"]:checked')?.value      || null,
+    interests:    interests,
+    satisfaction: ratingValue.value ? parseInt(ratingValue.value, 10)       : null,
+    suggestion:   textarea.value.trim()                                     || null,
+  };
 
   const btn = document.getElementById('submitBtn');
   btn.disabled = true;
   btn.textContent = '送出中…';
 
-  try {
-    const res = await fetch(FORMSPREE_ENDPOINT, {
-      method:  'POST',
-      body:    data,
-      headers: { 'Accept': 'application/json' }
-    });
+  const { error } = await _sb.from('submissions').insert(payload);
 
-    if (res.ok) {
-      form.style.display = 'none';
-      document.getElementById('successScreen').style.display = 'block';
-      document.getElementById('progressFill').style.width = '100%';
-    } else {
-      const json = await res.json().catch(() => ({}));
-      alert('送出失敗：' + (json.error || '請稍後再試。'));
-      btn.disabled = false;
-      btn.textContent = '送出問卷 →';
-    }
-  } catch {
-    alert('網路錯誤，請確認連線後再試。');
+  if (!error) {
+    form.style.display = 'none';
+    document.getElementById('successScreen').style.display = 'block';
+    document.getElementById('progressFill').style.width = '100%';
+  } else {
+    alert('送出失敗，請稍後再試。');
     btn.disabled = false;
     btn.textContent = '送出問卷 →';
   }

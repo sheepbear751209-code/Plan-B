@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>問卷管理後台</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════
+     LOGIN SCREEN
+══════════════════════════════════════════════ -->
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">
+      <span class="login-icon">📋</span>
+      <h1>問卷管理後台</h1>
+      <p>限內部授權人員使用</p>
+    </div>
+    <form id="loginForm" novalidate>
+      <div class="field-group">
+        <label for="loginEmail">電子郵件</label>
+        <input type="email" id="loginEmail" placeholder="your@company.com"
+               autocomplete="email" required />
+      </div>
+      <div class="field-group">
+        <label for="loginPassword">密碼</label>
+        <input type="password" id="loginPassword" placeholder="••••••••"
+               autocomplete="current-password" required />
+      </div>
+      <div id="loginError" class="login-error" hidden></div>
+      <button type="submit" class="btn-primary full-width" id="loginBtn">登入</button>
+    </form>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     APP SHELL（登入後顯示）
+══════════════════════════════════════════════ -->
+<div id="appShell" hidden>
+
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-icon">📋</span>
+      <span>問卷後台</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-view="submissions"
+              onclick="switchView('submissions')">
+        <span class="nav-icon">📥</span>
+        <span>回應管理</span>
+        <span class="nav-badge" id="activeBadge">0</span>
+      </button>
+      <button class="nav-item" data-view="cases"
+              onclick="switchView('cases')">
+        <span class="nav-icon">📁</span>
+        <span>結案紀錄</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" id="userAvatar">?</div>
+        <span class="user-email" id="userEmail">–</span>
+      </div>
+      <button class="btn-logout" onclick="handleLogout()">登出</button>
+    </div>
+  </aside>
+
+  <!-- ── Main Area ── -->
+  <div class="main-area">
+
+    <!-- ── 回應管理 View ── -->
+    <div id="view-submissions" class="view-panel">
+      <header class="view-header">
+        <h2>回應管理</h2>
+        <div class="stat-chips">
+          <span class="chip chip-new">新進 <strong id="countNew">0</strong></span>
+          <span class="chip chip-proc">處理中 <strong id="countProc">0</strong></span>
+          <span class="chip chip-done">已結案 <strong id="countDone">0</strong></span>
+        </div>
+      </header>
+
+      <div class="filter-bar">
+        <div class="filter-tabs">
+          <button class="tab active" data-f="active"   onclick="setFilter('active')">待處理</button>
+          <button class="tab"        data-f="新進"     onclick="setFilter('新進')">新進</button>
+          <button class="tab"        data-f="處理中"   onclick="setFilter('處理中')">處理中</button>
+          <button class="tab"        data-f="已結案"   onclick="setFilter('已結案')">已結案</button>
+          <button class="tab"        data-f="all"      onclick="setFilter('all')">全部</button>
+        </div>
+        <input type="search" id="searchInput" class="search-input"
+               placeholder="搜尋姓名或 Email…" />
+      </div>
+
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th class="sortable" onclick="toggleSort('submitted_at')">
+                填寫時間 <span class="sort-arrow" id="sort-submitted_at">↕</span>
+              </th>
+              <th>姓名</th>
+              <th>Email</th>
+              <th class="sortable" onclick="toggleSort('satisfaction')">
+                滿意度 <span class="sort-arrow" id="sort-satisfaction">↕</span>
+              </th>
+              <th>狀態</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="submissionsBody">
+            <tr><td colspan="6" class="loading-row">載入中…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div><!-- /view-submissions -->
+
+    <!-- ── 結案紀錄 View ── -->
+    <div id="view-cases" class="view-panel" hidden>
+      <header class="view-header">
+        <h2>結案紀錄</h2>
+        <button class="btn-outline" onclick="exportCSV()">⬇ 匯出 CSV</button>
+      </header>
+
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>結案時間</th>
+              <th>填寫者姓名</th>
+              <th>Email</th>
+              <th>滿意度</th>
+              <th>處理人員</th>
+              <th>處理結果摘要</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="casesBody">
+            <tr><td colspan="7" class="loading-row">載入中…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div><!-- /view-cases -->
+
+  </div><!-- /main-area -->
+</div><!-- /appShell -->
+
+
+<!-- ══════════════════════════════════════════════
+     SIDE PANEL：回應詳情
+══════════════════════════════════════════════ -->
+<div id="detailOverlay" class="overlay" onclick="closeDetail()"></div>
+
+<div id="detailPanel" class="side-panel">
+  <div class="panel-header">
+    <h3>回應詳情</h3>
+    <button class="btn-icon" onclick="closeDetail()">✕</button>
+  </div>
+  <div class="panel-body" id="detailBody">
+    <!-- 由 JS 動態填入 -->
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     MODAL：結案
+══════════════════════════════════════════════ -->
+<div id="closeCaseModal" class="modal-overlay" hidden>
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>🔒 結案</h3>
+      <button class="btn-icon" onclick="hideCloseCaseModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-group">
+        <label>處理人員姓名 <span class="required">*</span></label>
+        <input type="text" id="handlerName" placeholder="請輸入您的姓名" />
+      </div>
+      <div class="field-group">
+        <label>處理結果 <span class="required">*</span></label>
+        <textarea id="handlingResult" rows="4"
+          placeholder="說明本次如何處理這筆回應，例如：已聯繫客戶並退款，客戶確認滿意…"></textarea>
+      </div>
+      <div class="field-group">
+        <label>案件摘要 <span class="required">*</span></label>
+        <textarea id="caseSummaryText" rows="3"
+          placeholder="一到兩句簡短摘要，供其他成員快速了解此案況…"></textarea>
+      </div>
+      <div class="modal-info">⏱ 結案時間將自動記錄為目前時間</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline" onclick="hideCloseCaseModal()">取消</button>
+      <button class="btn-danger"  id="confirmCloseBtn" onclick="confirmCloseCase()">確認結案</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     MODAL：結案詳情（查看歷史紀錄）
+══════════════════════════════════════════════ -->
+<div id="caseDetailModal" class="modal-overlay" hidden
+     onclick="hideCaseDetailModal(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>📁 結案詳情</h3>
+      <button class="btn-icon" onclick="hideCaseDetailModal()">✕</button>
+    </div>
+    <div class="modal-body" id="caseDetailBody">
+      <!-- 由 JS 動態填入 -->
+    </div>
+  </div>
+</div>
+
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+
+<!-- ══════════════════════════════════════════════
+     SCRIPTS
+══════════════════════════════════════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ======================================================
+// ⚙️ 設定區 — 從 Supabase 控制台複製貼上
+// ======================================================
+const SUPABASE_URL      = 'https://YOUR_PROJECT.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY';
+
+// ── 初始化 Supabase Client ──
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════
+const S = {
+  user:         null,
+  submissions:  [],   // 所有回應
+  caseRecords:  [],   // 所有結案紀錄
+  filtered:     [],   // 篩選後的回應
+  filter:       'active',   // 'active' | '新進' | '處理中' | '已結案' | 'all'
+  search:       '',
+  sort:         { field: 'submitted_at', dir: 'desc' },
+  pendingId:    null, // 待結案的 submission id
+};
+
+// ════════════════════════════════════════════════════════
+// AUTH
+// ════════════════════════════════════════════════════════
+async function initAuth() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    S.user = session.user;
+    showApp();
+  } else {
+    showLoginPage();
+  }
+  sb.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN') {
+      S.user = session.user;
+      showApp();
+    } else if (event === 'SIGNED_OUT') {
+      S.user = null;
+      showLoginPage();
+    }
+  });
+}
+
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email    = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errEl    = document.getElementById('loginError');
+  const btn      = document.getElementById('loginBtn');
+
+  errEl.hidden = true;
+  btn.disabled = true;
+  btn.textContent = '登入中…';
+
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    errEl.textContent = error.message.includes('Invalid')
+      ? '帳號或密碼錯誤，請重新確認。'
+      : error.message;
+    errEl.hidden = false;
+  }
+  btn.disabled = false;
+  btn.textContent = '登入';
+});
+
+async function handleLogout() {
+  await sb.auth.signOut();
+}
+
+function showLoginPage() {
+  document.getElementById('loginScreen').style.display = '';
+  document.getElementById('appShell').hidden = true;
+}
+
+function showApp() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appShell').hidden = false;
+
+  const email = S.user?.email || '';
+  document.getElementById('userEmail').textContent = email;
+  document.getElementById('userAvatar').textContent = (email[0] || '?').toUpperCase();
+
+  loadSubmissions();
+  setupRealtime();
+}
+
+// ════════════════════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════════════════════
+function switchView(view) {
+  document.querySelectorAll('.nav-item').forEach(el =>
+    el.classList.toggle('active', el.dataset.view === view)
+  );
+  document.getElementById('view-submissions').hidden = (view !== 'submissions');
+  document.getElementById('view-cases').hidden = (view !== 'cases');
+
+  if (view === 'cases') loadCaseRecords();
+}
+
+// ════════════════════════════════════════════════════════
+// 回應管理 — 資料
+// ════════════════════════════════════════════════════════
+async function loadSubmissions() {
+  const { data, error } = await sb
+    .from('submissions')
+    .select('*')
+    .order('submitted_at', { ascending: false });
+
+  if (error) { console.error('loadSubmissions:', error); return; }
+  S.submissions = data || [];
+  updateCounts();
+  applyFilter();
+}
+
+function updateCounts() {
+  const n = S.submissions.filter(s => s.status === '新進').length;
+  const p = S.submissions.filter(s => s.status === '處理中').length;
+  const d = S.submissions.filter(s => s.status === '已結案').length;
+  document.getElementById('countNew').textContent  = n;
+  document.getElementById('countProc').textContent = p;
+  document.getElementById('countDone').textContent = d;
+  document.getElementById('activeBadge').textContent = n + p;
+}
+
+// ── 篩選 & 排序 ──
+function setFilter(f) {
+  S.filter = f;
+  document.querySelectorAll('.tab').forEach(el =>
+    el.classList.toggle('active', el.dataset.f === f)
+  );
+  applyFilter();
+}
+
+let _searchTimer;
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  clearTimeout(_searchTimer);
+  _searchTimer = setTimeout(() => {
+    S.search = e.target.value.trim().toLowerCase();
+    applyFilter();
+  }, 280);
+});
+
+function toggleSort(field) {
+  S.sort.dir = (S.sort.field === field && S.sort.dir === 'desc') ? 'asc' : 'desc';
+  S.sort.field = field;
+  // 更新箭頭
+  document.querySelectorAll('.sort-arrow').forEach(el => el.textContent = '↕');
+  const arrow = document.getElementById('sort-' + field);
+  if (arrow) arrow.textContent = (S.sort.dir === 'asc') ? '↑' : '↓';
+  applyFilter();
+}
+
+function applyFilter() {
+  let list = [...S.submissions];
+
+  if (S.filter === 'active') {
+    list = list.filter(s => s.status !== '已結案');
+  } else if (S.filter !== 'all') {
+    list = list.filter(s => s.status === S.filter);
+  }
+
+  if (S.search) {
+    list = list.filter(s =>
+      (s.name  || '').toLowerCase().includes(S.search) ||
+      (s.email || '').toLowerCase().includes(S.search)
+    );
+  }
+
+  list.sort((a, b) => {
+    const { field, dir } = S.sort;
+    const va = a[field] ?? '';
+    const vb = b[field] ?? '';
+    const cmp = String(va).localeCompare(String(vb), 'zh-TW');
+    return dir === 'asc' ? cmp : -cmp;
+  });
+
+  S.filtered = list;
+  renderSubmissions();
+}
+
+// ── 渲染列表 ──
+function renderSubmissions() {
+  const tbody = document.getElementById('submissionsBody');
+  if (S.filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" class="empty-row">目前沒有符合條件的回應</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = S.filtered.map(s => `
+    <tr class="clickable" onclick="openDetail('${s.id}')">
+      <td>${fmt(s.submitted_at)}</td>
+      <td>${esc(s.name)}</td>
+      <td class="cell-muted">${esc(s.email)}</td>
+      <td>${stars(s.satisfaction)}</td>
+      <td><span class="badge badge-${statusCls(s.status)}">${s.status}</span></td>
+      <td>
+        <button class="btn-sm"
+          onclick="event.stopPropagation(); openDetail('${s.id}')">查看</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// ════════════════════════════════════════════════════════
+// 詳情側邊欄
+// ════════════════════════════════════════════════════════
+function openDetail(id) {
+  const s = S.submissions.find(x => x.id === id);
+  if (!s) return;
+  const closed = s.status === '已結案';
+
+  document.getElementById('detailBody').innerHTML = `
+    <div class="detail-section">
+      <h4>基本資料</h4>
+      <dl class="detail-dl">
+        <dt>姓名</dt>    <dd>${esc(s.name)}</dd>
+        <dt>Email</dt>   <dd>${esc(s.email)}</dd>
+        <dt>電話</dt>    <dd>${s.phone || '–'}</dd>
+        <dt>填寫時間</dt><dd>${fmt(s.submitted_at)}</dd>
+      </dl>
+    </div>
+
+    <div class="detail-section">
+      <h4>問卷內容</h4>
+      <dl class="detail-dl">
+        <dt>來源管道</dt>    <dd>${s.source    || '–'}</dd>
+        <dt>感興趣主題</dt>  <dd>${s.interests || '–'}</dd>
+        <dt>整體滿意度</dt>  <dd>${s.satisfaction ? s.satisfaction + ' / 5　' + stars(s.satisfaction) : '–'}</dd>
+        <dt>建議與想法</dt>  <dd class="pre-wrap">${s.suggestion ? esc(s.suggestion) : '–'}</dd>
+      </dl>
+    </div>
+
+    <div class="detail-section">
+      <h4>處理狀態</h4>
+      <select class="status-select" ${closed ? 'disabled' : ''}
+        onchange="updateStatus('${s.id}', this.value)">
+        <option value="新進"   ${s.status === '新進'   ? 'selected' : ''}>🔵 新進</option>
+        <option value="處理中" ${s.status === '處理中' ? 'selected' : ''}>🟡 處理中</option>
+        <option value="已結案" disabled ${closed ? 'selected' : ''}>🟢 已結案</option>
+      </select>
+    </div>
+
+    <div class="detail-section">
+      <h4>內部備註 <small style="font-weight:400;text-transform:none;color:var(--muted)">（填寫者不可見）</small></h4>
+      <textarea class="note-textarea" id="noteArea" rows="4"
+        ${closed ? 'disabled' : ''}
+        placeholder="供內部人員記錄追蹤進度、溝通事項…"
+      >${s.internal_note ? esc(s.internal_note) : ''}</textarea>
+      ${!closed ? `<button class="btn-sm mt-sm" onclick="saveNote('${s.id}')">儲存備註</button>` : ''}
+    </div>
+
+    ${!closed ? `
+    <div class="detail-section">
+      <button class="btn-danger full-width" onclick="showCloseCaseModal('${s.id}')">
+        🔒 結案
+      </button>
+    </div>
+    ` : `
+    <div class="detail-section">
+      <div class="closed-notice">
+        ✅ 此案已結案，詳細結案紀錄請至「結案紀錄」查看
+      </div>
+    </div>
+    `}
+  `;
+
+  document.getElementById('detailPanel').classList.add('open');
+  document.getElementById('detailOverlay').classList.add('show');
+}
+
+function closeDetail() {
+  document.getElementById('detailPanel').classList.remove('open');
+  document.getElementById('detailOverlay').classList.remove('show');
+}
+
+async function updateStatus(id, status) {
+  const { error } = await sb.from('submissions').update({ status }).eq('id', id);
+  if (error) { showToast('❌ 更新失敗', 'error'); return; }
+  const idx = S.submissions.findIndex(s => s.id === id);
+  if (idx !== -1) S.submissions[idx].status = status;
+  updateCounts(); applyFilter();
+  showToast('✅ 狀態已更新');
+}
+
+async function saveNote(id) {
+  const note = document.getElementById('noteArea')?.value ?? '';
+  const { error } = await sb.from('submissions').update({ internal_note: note }).eq('id', id);
+  if (error) { showToast('❌ 儲存失敗', 'error'); return; }
+  const idx = S.submissions.findIndex(s => s.id === id);
+  if (idx !== -1) S.submissions[idx].internal_note = note;
+  showToast('✅ 備註已儲存');
+}
+
+// ════════════════════════════════════════════════════════
+// 結案 Modal
+// ════════════════════════════════════════════════════════
+function showCloseCaseModal(id) {
+  S.pendingId = id;
+  document.getElementById('handlerName').value    = '';
+  document.getElementById('handlingResult').value = '';
+  document.getElementById('caseSummaryText').value = '';
+  document.getElementById('closeCaseModal').hidden = false;
+}
+
+function hideCloseCaseModal() {
+  document.getElementById('closeCaseModal').hidden = true;
+  S.pendingId = null;
+}
+
+async function confirmCloseCase() {
+  const handlerName     = document.getElementById('handlerName').value.trim();
+  const handlingResult  = document.getElementById('handlingResult').value.trim();
+  const caseSummary     = document.getElementById('caseSummaryText').value.trim();
+
+  if (!handlerName || !handlingResult || !caseSummary) {
+    showToast('❌ 請填寫所有必填欄位', 'error');
+    return;
+  }
+
+  const sub = S.submissions.find(s => s.id === S.pendingId);
+  if (!sub) return;
+
+  const btn = document.getElementById('confirmCloseBtn');
+  btn.disabled = true;
+  btn.textContent = '結案中…';
+
+  // 插入結案紀錄（DB 觸發器會自動將 submission.status 改為「已結案」）
+  const { error } = await sb.from('case_records').insert({
+    submission_id:        S.pendingId,
+    handler_name:         handlerName,
+    handling_result:      handlingResult,
+    case_summary:         caseSummary,
+    // 問卷快照
+    snapshot_name:        sub.name,
+    snapshot_email:       sub.email,
+    snapshot_phone:       sub.phone        || null,
+    snapshot_source:      sub.source       || null,
+    snapshot_interests:   sub.interests    || null,
+    snapshot_satisfaction: sub.satisfaction || null,
+    snapshot_suggestion:  sub.suggestion   || null,
+    snapshot_submitted_at: sub.submitted_at,
+  });
+
+  btn.disabled = false;
+  btn.textContent = '確認結案';
+
+  if (error) {
+    showToast('❌ 結案失敗：' + error.message, 'error');
+    return;
+  }
+
+  // 更新本地快取
+  const idx = S.submissions.findIndex(s => s.id === S.pendingId);
+  if (idx !== -1) S.submissions[idx].status = '已結案';
+
+  hideCloseCaseModal();
+  closeDetail();
+  updateCounts();
+  applyFilter();
+  showToast('✅ 結案成功，紀錄已永久保存');
+}
+
+// ════════════════════════════════════════════════════════
+// 結案紀錄
+// ════════════════════════════════════════════════════════
+async function loadCaseRecords() {
+  const { data, error } = await sb
+    .from('case_records')
+    .select('*')
+    .order('closed_at', { ascending: false });
+
+  if (error) { console.error('loadCaseRecords:', error); return; }
+  S.caseRecords = data || [];
+  renderCaseRecords();
+}
+
+function renderCaseRecords() {
+  const tbody = document.getElementById('casesBody');
+  if (S.caseRecords.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" class="empty-row">尚無結案紀錄</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = S.caseRecords.map(r => `
+    <tr>
+      <td>${fmt(r.closed_at)}</td>
+      <td>${esc(r.snapshot_name)}</td>
+      <td class="cell-muted">${esc(r.snapshot_email)}</td>
+      <td>${stars(r.snapshot_satisfaction)}</td>
+      <td>${esc(r.handler_name)}</td>
+      <td class="cell-clamp">${esc(r.handling_result)}</td>
+      <td>
+        <button class="btn-sm" onclick="openCaseDetail('${r.id}')">詳情</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// ── 結案詳情 Modal ──
+function openCaseDetail(id) {
+  const r = S.caseRecords.find(x => x.id === id);
+  if (!r) return;
+
+  document.getElementById('caseDetailBody').innerHTML = `
+    <div class="case-record-wrap">
+
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">結案時間</span>
+          <span class="info-value">${fmt(r.closed_at)}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">處理人員</span>
+          <span class="info-value">${esc(r.handler_name)}</span>
+        </div>
+      </div>
+
+      <div class="case-section-block">
+        <h5>處理結果</h5>
+        <div class="text-block">${esc(r.handling_result)}</div>
+      </div>
+
+      <div class="case-section-block">
+        <h5>案件摘要</h5>
+        <div class="text-block">${esc(r.case_summary)}</div>
+      </div>
+
+      <hr class="divider" />
+
+      <div class="snapshot-header">
+        📸 原始問卷快照（結案當下的資料副本）
+      </div>
+
+      <dl class="detail-dl">
+        <dt>姓名</dt>      <dd>${esc(r.snapshot_name)}</dd>
+        <dt>Email</dt>     <dd>${esc(r.snapshot_email)}</dd>
+        <dt>電話</dt>      <dd>${r.snapshot_phone || '–'}</dd>
+        <dt>填寫時間</dt>  <dd>${fmt(r.snapshot_submitted_at)}</dd>
+        <dt>來源管道</dt>  <dd>${r.snapshot_source    || '–'}</dd>
+        <dt>感興趣主題</dt><dd>${r.snapshot_interests  || '–'}</dd>
+        <dt>整體滿意度</dt><dd>${r.snapshot_satisfaction ? r.snapshot_satisfaction + ' / 5　' + stars(r.snapshot_satisfaction) : '–'}</dd>
+        <dt>建議與想法</dt><dd class="pre-wrap">${r.snapshot_suggestion ? esc(r.snapshot_suggestion) : '–'}</dd>
+      </dl>
+
+    </div>
+  `;
+
+  document.getElementById('caseDetailModal').hidden = false;
+}
+
+function hideCaseDetailModal(e) {
+  if (e && e.target !== document.getElementById('caseDetailModal')) return;
+  document.getElementById('caseDetailModal').hidden = true;
+}
+
+// ════════════════════════════════════════════════════════
+// CSV 匯出
+// ════════════════════════════════════════════════════════
+function exportCSV() {
+  if (S.caseRecords.length === 0) {
+    showToast('目前沒有結案紀錄可匯出', 'error');
+    return;
+  }
+
+  const headers = [
+    '結案時間', '填寫者姓名', '填寫者Email', '填寫者電話',
+    '原始填寫時間', '來源管道', '感興趣主題', '整體滿意度', '建議與想法',
+    '處理人員', '處理結果', '案件摘要'
+  ];
+
+  const clean = v => String(v ?? '').replace(/"/g, '""');
+
+  const rows = S.caseRecords.map(r => [
+    fmt(r.closed_at),
+    clean(r.snapshot_name),
+    clean(r.snapshot_email),
+    clean(r.snapshot_phone),
+    fmt(r.snapshot_submitted_at),
+    clean(r.snapshot_source),
+    clean(r.snapshot_interests),
+    r.snapshot_satisfaction ?? '',
+    clean(r.snapshot_suggestion),
+    clean(r.handler_name),
+    clean(r.handling_result),
+    clean(r.case_summary),
+  ].map(v => `"${v}"`));
+
+  const csv = '﻿' + [headers.map(h => `"${h}"`), ...rows]
+    .map(r => r.join(',')).join('\r\n');
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = Object.assign(document.createElement('a'), {
+    href: url,
+    download: `結案紀錄_${new Date().toLocaleDateString('zh-TW').replace(/\//g, '-')}.csv`
+  });
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('✅ CSV 已匯出');
+}
+
+// ════════════════════════════════════════════════════════
+// REALTIME：其他成員操作時自動刷新
+// ════════════════════════════════════════════════════════
+function setupRealtime() {
+  sb.channel('rt-admin')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'submissions' },
+      () => loadSubmissions()
+    )
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'case_records' },
+      () => { if (!document.getElementById('view-cases').hidden) loadCaseRecords(); }
+    )
+    .subscribe();
+}
+
+// ════════════════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════════════════
+function fmt(d) {
+  if (!d) return '–';
+  return new Date(d).toLocaleString('zh-TW', {
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit'
+  });
+}
+
+function stars(n) {
+  if (!n) return '–';
+  return '★'.repeat(n) + '☆'.repeat(5 - n);
+}
+
+function statusCls(s) {
+  return { '新進': 'new', '處理中': 'proc', '已結案': 'done' }[s] || 'new';
+}
+
+function esc(v) {
+  return String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+let _toastTimer;
+function showToast(msg, type = 'success') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (type === 'error' ? ' error' : '');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ── 啟動 ──
+initAuth();
+</script>
+</body>
+</html>
