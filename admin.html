@@ -783,6 +783,14 @@ function showToast(msg, type = 'success') {
   _toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
 }
 
+// ── ESC 鍵關閉所有 Modal ──
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeAllModals();
+    closeDetail();
+  }
+});
+
 // ── 啟動 ──
 initAuth();
 </script>
