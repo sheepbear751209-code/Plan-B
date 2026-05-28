@@ -830,7 +830,7 @@ async function loadRoster() {
     .select('*')
     .order('shift_number');
 
-  if (error) { showToast('❌ 番號載入失敗', 'error'); return; }
+  if (error) showToast('❌ 番號載入失敗，請確認資料表已建立', 'error');
   S_roster = data || [];
   renderRoster();
 }
@@ -888,7 +888,7 @@ async function loadCalendar() {
     .gte('date', first)
     .lte('date', last);
 
-  if (error) { showToast('❌ 月曆載入失敗', 'error'); return; }
+  if (error) showToast('❌ 月曆載入失敗，請確認資料表已建立', 'error');
 
   S_shifts = {};
   (data || []).forEach(r => { S_shifts[r.date] = r.shift_number; });
