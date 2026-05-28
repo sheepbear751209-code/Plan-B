@@ -141,9 +141,33 @@
           <span class="error-msg">請至少勾選一項</span>
         </div>
 
-        <!-- Q6 性別 -->
+        <!-- Q6 死亡方式 -->
         <div class="question-block" data-required>
-          <label>6. 死者性別 <span class="required">*</span></label>
+          <label>6. 本案死者死亡方式 <span class="required">*</span></label>
+          <p class="hint">可複選</p>
+          <div class="option-group">
+            <label class="option-item">
+              <input type="checkbox" name="death_method" value="疑為自殺" /> 疑為自殺
+            </label>
+            <label class="option-item">
+              <input type="checkbox" name="death_method" value="疑為意外" /> 疑為意外
+            </label>
+            <label class="option-item">
+              <input type="checkbox" name="death_method" value="疑為疾病" /> 疑為疾病
+            </label>
+            <label class="option-item">
+              <input type="checkbox" name="death_method" value="非自然死亡" /> 非自然死亡
+            </label>
+            <label class="option-item">
+              <input type="checkbox" name="death_method" value="無法辨識" /> 無法辨識
+            </label>
+          </div>
+          <span class="error-msg">請至少勾選一項</span>
+        </div>
+
+        <!-- Q7 性別 -->
+        <div class="question-block" data-required>
+          <label>7. 死者性別 <span class="required">*</span></label>
           <div class="option-group">
             <label class="option-item">
               <input type="radio" name="death_gender" value="男性" /> 男性
@@ -158,16 +182,16 @@
           <span class="error-msg">請選擇一項</span>
         </div>
 
-        <!-- Q7 出生年份 -->
+        <!-- Q8 出生年份 -->
         <div class="question-block" data-required>
-          <label>7. 死者出生年份 <span class="required">*</span></label>
+          <label>8. 死者出生年份 <span class="required">*</span></label>
           <input type="text" id="birth-death" name="victim_birth_year" placeholder="例：1985" />
           <span class="error-msg">此欄位為必填</span>
         </div>
 
-        <!-- Q8 國籍 -->
+        <!-- Q9 國籍 -->
         <div class="question-block" data-required>
-          <label>8. 死者國籍 <span class="required">*</span></label>
+          <label>9. 死者國籍 <span class="required">*</span></label>
           <div class="option-group">
             <label class="option-item">
               <input type="radio" name="death_nationality" value="本國籍" /> 本國籍
@@ -182,9 +206,9 @@
           <span class="error-msg">請選擇一項</span>
         </div>
 
-        <!-- Q9 涉嫌人 -->
+        <!-- Q10 涉嫌人 -->
         <div class="question-block" data-required>
-          <label>9. 本案有無涉嫌人 <span class="required">*</span></label>
+          <label>10. 本案有無涉嫌人 <span class="required">*</span></label>
           <div class="option-group">
             <label class="option-item">
               <input type="radio" name="death_suspect" value="有" /> 有
@@ -199,9 +223,9 @@
           <span class="error-msg">請選擇一項</span>
         </div>
 
-        <!-- Q10 其他 -->
+        <!-- Q11 其他 -->
         <div class="question-block">
-          <label>10. 是否有其他現場情形需要描述？</label>
+          <label>11. 是否有其他現場情形需要描述？</label>
           <textarea id="q10-death" name="q10"
                     placeholder="請填寫其他需補充說明之事項…" rows="3"></textarea>
         </div>
@@ -599,8 +623,11 @@ function countFilled() {
 
   const activeSection = document.querySelector('.conditional-section:not([hidden])');
   if (activeSection) {
-    total += 5; // Q5 勾選 + Q6 性別 + Q7 出生年份 + Q8 國籍 + Q9 涉嫌人
-    if (activeSection.querySelector('input[type="checkbox"]:checked'))  filled++;
+    const hasDeathMethod = !!activeSection.querySelector('[name="death_method"]');
+    total += hasDeathMethod ? 6 : 5; // 死亡案多一個死亡方式題
+    if (activeSection.querySelector('[name="interests"]:checked'))      filled++; // Q5
+    if (hasDeathMethod &&
+        activeSection.querySelector('[name="death_method"]:checked'))   filled++; // Q6 死亡方式
     if (activeSection.querySelector('[name$="_gender"]:checked'))       filled++;
     if (activeSection.querySelector('[id^="birth-"]')?.value.trim())   filled++;
     if (activeSection.querySelector('[name$="_nationality"]:checked'))  filled++;
@@ -664,13 +691,15 @@ document.getElementById('surveyForm').addEventListener('submit', async (e) => {
   const caseType      = form.querySelector('[name="source"]:checked')?.value || null;
   const activeSection = document.querySelector('.conditional-section:not([hidden])');
 
-  // 現場狀況勾選
+  // Q5 現場狀況勾選（interests 欄位，排除 death_method）
   const interests = activeSection
-    ? [...activeSection.querySelectorAll('input[type="checkbox"]:checked')]
+    ? [...activeSection.querySelectorAll('[name="interests"]:checked')]
         .map(cb => cb.value).join('、') || null
     : null;
 
-  // 被害人模糊資料（Q6–Q9）
+  // 被害人模糊資料
+  const deathMethodValues = [...(activeSection?.querySelectorAll('[name="death_method"]:checked') || [])]
+    .map(cb => cb.value).join('、');
   const genderEl      = activeSection?.querySelector('[name$="_gender"]:checked');
   const birthEl       = activeSection?.querySelector('[id^="birth-"]');
   const nationalityEl = activeSection?.querySelector('[name$="_nationality"]:checked');
@@ -678,6 +707,7 @@ document.getElementById('surveyForm').addEventListener('submit', async (e) => {
   const q10El         = activeSection?.querySelector('[id^="q10-"]');
 
   const victimInfo = [
+    deathMethodValues           ? `死亡方式：${deathMethodValues}`     : null,
     genderEl                    ? `性別：${genderEl.value}`            : null,
     birthEl?.value.trim()       ? `出生年份：${birthEl.value.trim()}`  : null,
     nationalityEl               ? `國籍：${nationalityEl.value}`       : null,
