@@ -811,10 +811,11 @@ document.getElementById('surveyForm').addEventListener('submit', async (e) => {
     document.getElementById('successScreen').style.display = 'block';
     document.getElementById('progressFill').style.width = '100%';
   } else {
-    alert('送出失敗，請稍後再試。');
+    console.error('Supabase insert error:', JSON.stringify(error));
+    alert(`送出失敗，請稍後再試。\n（錯誤代碼：${error?.code || 'unknown'}）`);
     btn.disabled = false;
     btn.textContent = '送出申請 →';
-    grecaptcha.reset(); // 送出失敗時重置 CAPTCHA，讓使用者重新勾選
+    grecaptcha.reset();
   }
 });
 </script>
