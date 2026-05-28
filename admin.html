@@ -10,6 +10,37 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="admin.css" />
+  <style>
+    /* ── 番號管理 ── */
+    .content-wrap { padding: 1.5rem; background: #fff; border-radius: 8px; border: 1px solid var(--border); }
+    .roster-hint { font-size: .85rem; color: var(--muted); margin-bottom: 1.25rem; }
+    .roster-grid { display: flex; flex-direction: column; }
+    .roster-row { display: grid; grid-template-columns: 64px 1fr 1fr auto; gap: 10px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .roster-row:last-child { border-bottom: none; }
+    .roster-num { font-weight: 700; color: var(--primary); font-size: .95rem; }
+    .roster-input { padding: .5rem .75rem; border: 1.5px solid var(--border); border-radius: 6px; font-size: .9rem; font-family: inherit; transition: border-color .2s; width: 100%; }
+    .roster-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79,70,229,.12); }
+
+    /* ── 值班月曆 ── */
+    .cal-toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 1rem; }
+    .cal-title { font-size: 1.1rem; font-weight: 700; min-width: 110px; text-align: center; }
+    .cal-dow-header { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 4px; }
+    .cal-dow-label { text-align: center; font-size: .75rem; font-weight: 600; color: var(--muted); padding: 4px 0; }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .cal-cell { border: 1.5px solid var(--border); border-radius: 6px; padding: 6px 4px; min-height: 68px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .cal-cell.empty { background: #f8fafc; border-color: transparent; }
+    .cal-cell.today { border-color: var(--primary); background: #f5f3ff; }
+    .cal-day { font-size: .8rem; font-weight: 600; color: var(--text); }
+    .cal-cell.today .cal-day { color: var(--primary); }
+    .cal-select { width: 100%; font-size: .75rem; padding: 3px 2px; border: 1px solid var(--border); border-radius: 4px; background: #fff; cursor: pointer; text-align: center; }
+    .cal-select:focus { outline: none; border-color: var(--primary); }
+    .cal-save-bar { margin-top: 1.25rem; display: flex; justify-content: flex-end; }
+    @media (max-width: 600px) {
+      .roster-row { grid-template-columns: 52px 1fr 1fr auto; gap: 6px; }
+      .cal-cell { min-height: 54px; padding: 4px 2px; }
+      .cal-select { font-size: .7rem; }
+    }
+  </style>
 </head>
 <body>
 
@@ -63,6 +94,16 @@
               onclick="switchView('cases')">
         <span class="nav-icon">📁</span>
         <span>結案紀錄</span>
+      </button>
+      <button class="nav-item" data-view="roster"
+              onclick="switchView('roster')">
+        <span class="nav-icon">👤</span>
+        <span>番號管理</span>
+      </button>
+      <button class="nav-item" data-view="calendar"
+              onclick="switchView('calendar')">
+        <span class="nav-icon">📅</span>
+        <span>值班月曆</span>
       </button>
     </nav>
 
@@ -148,6 +189,46 @@
         </table>
       </div>
     </div><!-- /view-cases -->
+
+    <!-- ── 番號管理 View ── -->
+    <div id="view-roster" class="view-panel" hidden>
+      <header class="view-header">
+        <h2>番號管理</h2>
+      </header>
+      <div class="content-wrap">
+        <p class="roster-hint">設定第 1–5 番的值班人員姓名與手機號碼，各番獨立儲存。儲存後當日填表人員即可在送出申請後看到今日值班人員的聯絡資訊。</p>
+        <div class="roster-grid" id="rosterGrid">
+          <div style="text-align:center; padding:2rem; color:var(--muted)">載入中…</div>
+        </div>
+      </div>
+    </div><!-- /view-roster -->
+
+    <!-- ── 值班月曆 View ── -->
+    <div id="view-calendar" class="view-panel" hidden>
+      <header class="view-header">
+        <h2>值班月曆</h2>
+      </header>
+      <div class="content-wrap">
+        <div class="cal-toolbar">
+          <button class="btn-outline" onclick="prevMonth()">◀</button>
+          <span class="cal-title" id="calTitle"></span>
+          <button class="btn-outline" onclick="nextMonth()">▶</button>
+        </div>
+        <div class="cal-dow-header">
+          <div class="cal-dow-label">日</div>
+          <div class="cal-dow-label">一</div>
+          <div class="cal-dow-label">二</div>
+          <div class="cal-dow-label">三</div>
+          <div class="cal-dow-label">四</div>
+          <div class="cal-dow-label">五</div>
+          <div class="cal-dow-label">六</div>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+        <div class="cal-save-bar">
+          <button class="btn-primary" onclick="saveCalendar()">💾 儲存本月排班</button>
+        </div>
+      </div>
+    </div><!-- /view-calendar -->
 
   </div><!-- /main-area -->
 </div><!-- /appShell -->
@@ -243,30 +324,27 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // ════════════════════════════════════════════════════════
 const S = {
   user:         null,
-  submissions:  [],   // 所有回應
-  caseRecords:  [],   // 所有結案紀錄
-  filtered:     [],   // 篩選後的回應
-  filter:       'active',   // 'active' | '新進' | '處理中' | '已結案' | 'all'
+  submissions:  [],
+  caseRecords:  [],
+  filtered:     [],
+  filter:       'active',
   search:       '',
   sort:         { field: 'submitted_at', dir: 'desc' },
-  pendingId:    null, // 待結案的 submission id
+  pendingId:    null,
 };
 
 // ════════════════════════════════════════════════════════
 // AUTH
 // ════════════════════════════════════════════════════════
 async function initAuth() {
-  // 頁面載入時，一律先顯示登入頁
   showLoginPage();
 
   const { data: { session } } = await sb.auth.getSession();
 
   if (session?.user?.email) {
-    // 只有當 session 帶有有效的 email 才自動進入後台
     S.user = session.user;
     showApp();
   } else if (session) {
-    // session 存在但沒有 email（匿名 session），強制登出
     await sb.auth.signOut();
   }
 
@@ -333,9 +411,13 @@ function switchView(view) {
     el.classList.toggle('active', el.dataset.view === view)
   );
   document.getElementById('view-submissions').hidden = (view !== 'submissions');
-  document.getElementById('view-cases').hidden = (view !== 'cases');
+  document.getElementById('view-cases').hidden       = (view !== 'cases');
+  document.getElementById('view-roster').hidden      = (view !== 'roster');
+  document.getElementById('view-calendar').hidden    = (view !== 'calendar');
 
-  if (view === 'cases') loadCaseRecords();
+  if (view === 'cases')    loadCaseRecords();
+  if (view === 'roster')   loadRoster();
+  if (view === 'calendar') loadCalendar();
 }
 
 // ════════════════════════════════════════════════════════
@@ -363,7 +445,6 @@ function updateCounts() {
   document.getElementById('activeBadge').textContent = n + p;
 }
 
-// ── 篩選 & 排序 ──
 function setFilter(f) {
   S.filter = f;
   document.querySelectorAll('.tab').forEach(el =>
@@ -384,7 +465,6 @@ document.getElementById('searchInput').addEventListener('input', (e) => {
 function toggleSort(field) {
   S.sort.dir = (S.sort.field === field && S.sort.dir === 'desc') ? 'asc' : 'desc';
   S.sort.field = field;
-  // 更新箭頭
   document.querySelectorAll('.sort-arrow').forEach(el => el.textContent = '↕');
   const arrow = document.getElementById('sort-' + field);
   if (arrow) arrow.textContent = (S.sort.dir === 'asc') ? '↑' : '↓';
@@ -419,7 +499,6 @@ function applyFilter() {
   renderSubmissions();
 }
 
-// ── 渲染列表 ──
 function renderSubmissions() {
   const tbody = document.getElementById('submissionsBody');
   if (S.filtered.length === 0) {
@@ -533,7 +612,6 @@ async function saveNote(id) {
 // ════════════════════════════════════════════════════════
 // 結案 Modal
 // ════════════════════════════════════════════════════════
-// 關閉所有 Modal（避免疊加）
 function closeAllModals() {
   document.getElementById('closeCaseModal').hidden = true;
   document.getElementById('caseDetailModal').hidden = true;
@@ -571,13 +649,11 @@ async function confirmCloseCase() {
   btn.disabled = true;
   btn.textContent = '結案中…';
 
-  // 插入結案紀錄（DB 觸發器會自動將 submission.status 改為「已結案」）
   const { error } = await sb.from('case_records').insert({
     submission_id:        S.pendingId,
     handler_name:         handlerName,
     handling_result:      handlingResult,
     case_summary:         caseSummary,
-    // 問卷快照
     snapshot_name:        sub.name,
     snapshot_email:       sub.email,
     snapshot_phone:       sub.phone        || null,
@@ -596,7 +672,6 @@ async function confirmCloseCase() {
     return;
   }
 
-  // 更新本地快取
   const idx = S.submissions.findIndex(s => s.id === S.pendingId);
   if (idx !== -1) S.submissions[idx].status = '已結案';
 
@@ -642,7 +717,6 @@ function renderCaseRecords() {
   `).join('');
 }
 
-// ── 結案詳情 Modal ──
 function openCaseDetail(id) {
   closeAllModals();
   const r = S.caseRecords.find(x => x.id === id);
@@ -746,7 +820,170 @@ function exportCSV() {
 }
 
 // ════════════════════════════════════════════════════════
-// REALTIME：其他成員操作時自動刷新
+// 番號管理
+// ════════════════════════════════════════════════════════
+let S_roster = [];
+
+async function loadRoster() {
+  const { data, error } = await sb
+    .from('duty_roster')
+    .select('*')
+    .order('shift_number');
+
+  if (error) { showToast('❌ 番號載入失敗', 'error'); return; }
+  S_roster = data || [];
+  renderRoster();
+}
+
+function renderRoster() {
+  const grid = document.getElementById('rosterGrid');
+  grid.innerHTML = [1, 2, 3, 4, 5].map(n => {
+    const slot = S_roster.find(r => r.shift_number === n) || {};
+    return `
+      <div class="roster-row">
+        <span class="roster-num">第 ${n} 番</span>
+        <input type="text" class="roster-input" id="r-name-${n}"
+               value="${esc(slot.name || '')}" placeholder="姓名" />
+        <input type="tel"  class="roster-input" id="r-phone-${n}"
+               value="${esc(slot.phone || '')}" placeholder="手機號碼" />
+        <button class="btn-sm" onclick="saveRosterRow(${n})">儲存</button>
+      </div>
+    `;
+  }).join('');
+}
+
+async function saveRosterRow(n) {
+  const name  = document.getElementById(`r-name-${n}`).value.trim();
+  const phone = document.getElementById(`r-phone-${n}`).value.trim();
+
+  const { error } = await sb.from('duty_roster')
+    .upsert({ shift_number: n, name, phone });
+
+  if (error) { showToast('❌ 儲存失敗', 'error'); return; }
+
+  const idx = S_roster.findIndex(r => r.shift_number === n);
+  if (idx !== -1) { S_roster[idx].name = name; S_roster[idx].phone = phone; }
+  else S_roster.push({ shift_number: n, name, phone });
+
+  showToast(`✅ 第 ${n} 番已儲存`);
+}
+
+// ════════════════════════════════════════════════════════
+// 值班月曆
+// ════════════════════════════════════════════════════════
+let calYear   = new Date().getFullYear();
+let calMonth  = new Date().getMonth(); // 0-indexed
+let S_shifts  = {};   // { 'YYYY-MM-DD': shift_number }
+let _calDirty = false;
+
+async function loadCalendar() {
+  const y  = calYear;
+  const m  = calMonth;
+  const first = `${y}-${String(m + 1).padStart(2, '0')}-01`;
+  const last  = new Date(y, m + 1, 0).toISOString().split('T')[0];
+
+  const { data, error } = await sb
+    .from('shift_calendar')
+    .select('date, shift_number')
+    .gte('date', first)
+    .lte('date', last);
+
+  if (error) { showToast('❌ 月曆載入失敗', 'error'); return; }
+
+  S_shifts = {};
+  (data || []).forEach(r => { S_shifts[r.date] = r.shift_number; });
+  _calDirty = false;
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const y = calYear;
+  const m = calMonth;
+
+  document.getElementById('calTitle').textContent = `${y} 年 ${m + 1} 月`;
+
+  const today      = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Taipei' });
+  const firstDow   = new Date(y, m, 1).getDay();
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+
+  let html = '';
+  for (let i = 0; i < firstDow; i++) {
+    html += '<div class="cal-cell empty"></div>';
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const shift   = S_shifts[dateStr] || '';
+    const isToday = dateStr === today;
+    html += `
+      <div class="cal-cell${isToday ? ' today' : ''}">
+        <span class="cal-day">${d}</span>
+        <select class="cal-select" id="cal-${dateStr}" onchange="_calDirty=true">
+          <option value="">–</option>
+          ${[1, 2, 3, 4, 5].map(n =>
+            `<option value="${n}"${shift == n ? ' selected' : ''}>番${n}</option>`
+          ).join('')}
+        </select>
+      </div>`;
+  }
+
+  document.getElementById('calGrid').innerHTML = html;
+}
+
+function prevMonth() {
+  if (_calDirty && !confirm('有未儲存的排班，確定要離開？')) return;
+  calMonth--;
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  loadCalendar();
+}
+
+function nextMonth() {
+  if (_calDirty && !confirm('有未儲存的排班，確定要離開？')) return;
+  calMonth++;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  loadCalendar();
+}
+
+async function saveCalendar() {
+  const y = calYear;
+  const m = calMonth;
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+
+  const upserts = [];
+  const deletes = [];
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const sel     = document.getElementById(`cal-${dateStr}`);
+    const val     = sel?.value;
+
+    if (val) {
+      upserts.push({ date: dateStr, shift_number: parseInt(val) });
+    } else if (S_shifts[dateStr]) {
+      deletes.push(dateStr);
+    }
+  }
+
+  let err;
+  if (upserts.length > 0) {
+    const { error } = await sb.from('shift_calendar').upsert(upserts);
+    err = error;
+  }
+  if (!err && deletes.length > 0) {
+    const { error } = await sb.from('shift_calendar').delete().in('date', deletes);
+    err = error;
+  }
+
+  if (err) { showToast('❌ 儲存失敗：' + err.message, 'error'); return; }
+
+  upserts.forEach(r => { S_shifts[r.date] = r.shift_number; });
+  deletes.forEach(d => { delete S_shifts[d]; });
+  _calDirty = false;
+
+  showToast(`✅ ${y} 年 ${m + 1} 月排班已儲存`);
+}
+
+// ════════════════════════════════════════════════════════
+// REALTIME
 // ════════════════════════════════════════════════════════
 function setupRealtime() {
   sb.channel('rt-admin')
@@ -770,11 +1007,6 @@ function fmt(d) {
   });
 }
 
-function stars(n) {
-  if (!n) return '–';
-  return '★'.repeat(n) + '☆'.repeat(5 - n);
-}
-
 function statusCls(s) {
   return { '新進': 'new', '處理中': 'proc', '已結案': 'done' }[s] || 'new';
 }
@@ -793,7 +1025,6 @@ function showToast(msg, type = 'success') {
   _toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
 }
 
-// ── ESC 鍵關閉所有 Modal ──
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     closeAllModals();
@@ -801,7 +1032,6 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// ── 啟動 ──
 initAuth();
 </script>
 </body>

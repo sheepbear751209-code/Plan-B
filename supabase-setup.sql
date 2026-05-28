@@ -127,6 +127,54 @@ CREATE OR REPLACE TRIGGER trg_auto_close_submission
   FOR EACH ROW
   EXECUTE FUNCTION fn_auto_close_submission();
 
+-- ──────────────────────────────────────────────────────────
+-- 7. duty_roster：5 個值班番號的人員設定
+-- ──────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS duty_roster (
+  shift_number  SMALLINT PRIMARY KEY CHECK (shift_number BETWEEN 1 AND 5),
+  name          TEXT NOT NULL DEFAULT '',
+  phone         TEXT NOT NULL DEFAULT ''
+);
+
+-- 初始化 5 個番號（若已存在則不更動）
+INSERT INTO duty_roster (shift_number, name, phone)
+VALUES (1,'',''), (2,'',''), (3,'',''), (4,'',''), (5,'','')
+ON CONFLICT DO NOTHING;
+
+-- ──────────────────────────────────────────────────────────
+-- 8. shift_calendar：每日值班番號排班
+-- ──────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS shift_calendar (
+  date          DATE PRIMARY KEY,
+  shift_number  SMALLINT NOT NULL REFERENCES duty_roster(shift_number)
+);
+
+CREATE INDEX IF NOT EXISTS idx_shift_calendar_date
+  ON shift_calendar(date DESC);
+
+-- ──────────────────────────────────────────────────────────
+-- 9. 新表的 RLS
+-- ──────────────────────────────────────────────────────────
+ALTER TABLE duty_roster    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE shift_calendar ENABLE ROW LEVEL SECURITY;
+
+-- anon（C 端）可讀，查詢今日值班
+CREATE POLICY "anon_select_duty_roster"
+  ON duty_roster FOR SELECT TO anon USING (true);
+
+CREATE POLICY "anon_select_shift_calendar"
+  ON shift_calendar FOR SELECT TO anon USING (true);
+
+-- B 端（登入後）可完整操作
+CREATE POLICY "auth_all_duty_roster"
+  ON duty_roster FOR ALL TO authenticated
+  USING (true) WITH CHECK (true);
+
+CREATE POLICY "auth_all_shift_calendar"
+  ON shift_calendar FOR ALL TO authenticated
+  USING (true) WITH CHECK (true);
+
 -- ============================================================
--- 完成！可在 Supabase 控制台的 Table Editor 確認兩張資料表已建立。
+-- 完成！共 4 張資料表：submissions、case_records、
+--        duty_roster、shift_calendar
 -- ============================================================

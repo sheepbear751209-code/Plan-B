@@ -76,7 +76,7 @@
     <div class="success-screen" id="successScreen">
       <div class="check-icon">✅</div>
       <h2>申請已送出！</h2>
-      <p>您的申請已成功送出，請務必保持電話暢通，鑑識人員將確認後回覆。</p>
+      <p id="successMsg">您的申請已成功送出，請務必保持電話暢通，鑑識人員將確認後回覆。</p>
     </div>
 
     <!-- 問卷主體 -->
@@ -590,6 +590,23 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+// ── 查詢今日值班人員 ──
+async function getTodayDutyOfficer() {
+  const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Taipei' });
+  const { data: cal } = await _sb
+    .from('shift_calendar')
+    .select('shift_number')
+    .eq('date', today)
+    .maybeSingle();
+  if (!cal) return null;
+  const { data: roster } = await _sb
+    .from('duty_roster')
+    .select('name, phone')
+    .eq('shift_number', cal.shift_number)
+    .maybeSingle();
+  return roster;
+}
+
 // ── 同意書邏輯 ──
 const consentCheck  = document.getElementById('consentCheck');
 const consentBtn    = document.getElementById('consentBtn');
@@ -783,6 +800,14 @@ document.getElementById('surveyForm').addEventListener('submit', async (e) => {
 
   if (!error) {
     form.style.display = 'none';
+    // 查詢今日值班人員並更新成功訊息
+    try {
+      const duty = await getTodayDutyOfficer();
+      if (duty?.name && duty?.phone) {
+        document.getElementById('successMsg').textContent =
+          `您的申請已成功送出，今日鑑識值班人員為 ${duty.name}，請直撥聯繫電話 ${duty.phone} 或偵查隊警用 3310。`;
+      }
+    } catch (_) { /* 查詢失敗時保留預設訊息 */ }
     document.getElementById('successScreen').style.display = 'block';
     document.getElementById('progressFill').style.width = '100%';
   } else {
