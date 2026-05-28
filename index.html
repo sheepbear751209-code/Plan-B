@@ -144,25 +144,24 @@
         <!-- Q6 死亡方式 -->
         <div class="question-block" data-required>
           <label>6. 本案死者死亡方式 <span class="required">*</span></label>
-          <p class="hint">可複選</p>
           <div class="option-group">
             <label class="option-item">
-              <input type="checkbox" name="death_method" value="疑為自殺" /> 疑為自殺
+              <input type="radio" name="death_method" value="疑為自殺" /> 疑為自殺
             </label>
             <label class="option-item">
-              <input type="checkbox" name="death_method" value="疑為意外" /> 疑為意外
+              <input type="radio" name="death_method" value="疑為意外" /> 疑為意外
             </label>
             <label class="option-item">
-              <input type="checkbox" name="death_method" value="疑為疾病" /> 疑為疾病
+              <input type="radio" name="death_method" value="疑為疾病" /> 疑為疾病
             </label>
             <label class="option-item">
-              <input type="checkbox" name="death_method" value="非自然死亡" /> 非自然死亡
+              <input type="radio" name="death_method" value="非自然死亡" /> 非自然死亡
             </label>
             <label class="option-item">
-              <input type="checkbox" name="death_method" value="無法辨識" /> 無法辨識
+              <input type="radio" name="death_method" value="無法辨識" /> 無法辨識
             </label>
           </div>
-          <span class="error-msg">請至少勾選一項</span>
+          <span class="error-msg">請選擇一項</span>
         </div>
 
         <!-- Q7 性別 -->
@@ -698,8 +697,7 @@ document.getElementById('surveyForm').addEventListener('submit', async (e) => {
     : null;
 
   // 被害人模糊資料
-  const deathMethodValues = [...(activeSection?.querySelectorAll('[name="death_method"]:checked') || [])]
-    .map(cb => cb.value).join('、');
+  const deathMethodValues = activeSection?.querySelector('[name="death_method"]:checked')?.value || '';
   const genderEl      = activeSection?.querySelector('[name$="_gender"]:checked');
   const birthEl       = activeSection?.querySelector('[id^="birth-"]');
   const nationalityEl = activeSection?.querySelector('[name$="_nationality"]:checked');
