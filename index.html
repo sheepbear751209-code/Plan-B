@@ -161,7 +161,9 @@
 const SUPABASE_URL      = 'https://ljwdflbqalrchraejjjt.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxqd2RmbGJxYWxyY2hyYWVqamp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NTgwNDYsImV4cCI6MjA5NTQzNDA0Nn0.if3F3xB3HUwDCuCbZqK8JR-zyLIeAGT4bDHUoIeGZfc';
 
-const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
+});
 
 // ── 評分按鈕動態產生 ──
 const ratingScale = document.getElementById('ratingScale');
