@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS submissions (
   email         TEXT        NOT NULL,
   phone         TEXT,
   source        TEXT,
+  location      TEXT,                          -- 現場地址（Q4）
   interests     TEXT,                          -- 多選，以「、」分隔
   satisfaction  SMALLINT    CHECK (satisfaction BETWEEN 1 AND 5),
   suggestion    TEXT,

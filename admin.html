@@ -563,6 +563,7 @@ function openDetail(id) {
     <div class="detail-section">
       <h4>申請案件資料</h4>
       <dl class="detail-dl">
+        <dt>現場地址</dt>      <dd>${esc(s.location || '–')}</dd>
         <dt>案件類別</dt>      <dd>${s.source    || '–'}</dd>
         <dt>現場狀況勾選</dt>  <dd class="pre-wrap">${s.interests ? esc(s.interests).replace(/、/g, '\n') : '–'}</dd>
         <dt>年籍資料及描述</dt><dd class="pre-wrap">${s.suggestion ? esc(s.suggestion) : '–'}</dd>
@@ -665,7 +666,7 @@ function buildTemplate(sub) {
   const victimParts = [gender, birth, nation, suspect ? `涉嫌人：${suspect}` : ''].filter(Boolean);
   const victimLine  = victimParts.join('，') || '（請填入）';
 
-  const head = `案由：OO所轄內民眾疑似${src}現場勘察\n\n二、勘察時間：115年　月　日　時　分\n\n三、勘察地點：桃園市大園區\n\n四、案情摘要：\n`;
+  const head = `案由：OO所轄內民眾疑似${src}現場勘察\n\n二、勘察時間：115年　月　日　時　分\n\n三、勘察地點：${sub.location || '（請填入）'}\n\n四、案情摘要：\n`;
 
   if (src === '死亡案') {
     return head +

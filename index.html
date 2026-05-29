@@ -11,14 +11,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* 條件式區塊動畫 */
     .conditional-section { animation: fadeIn .3s ease; }
     .conditional-section[hidden] { display: none !important; }
-    /* reCAPTCHA 間距 */
     .captcha-wrap { margin-bottom: 1.5rem; }
     .captcha-wrap .error-msg { display: none; margin-top: .4rem; }
     .captcha-wrap.has-error .error-msg { display: block; }
-    /* 同意書 */
     .consent-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 1.25rem; }
     .consent-body { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; line-height: 1.85; }
     .consent-body h3 { font-size: .88rem; font-weight: 700; margin: 1rem 0 .3rem; color: var(--primary); }
@@ -28,30 +25,26 @@
     .consent-check-label { display: flex; align-items: flex-start; gap: .65rem; cursor: pointer; }
     .consent-check-label input[type="checkbox"] { margin-top: 3px; width: 16px; height: 16px; flex-shrink: 0; accent-color: var(--primary); }
     .consent-check-label span { font-size: .95rem; font-weight: 600; }
-    /* 成功畫面：值班人員資訊 */
     .duty-highlight { margin-top: 1.2rem; font-size: 1.05rem; font-weight: 600; color: #333; line-height: 1.9; }
     .duty-highlight .duty-name,
     .duty-highlight .duty-phone { font-size: 1.35rem; font-weight: 700; color: #cc0000; }
   </style>
-  <!-- ★ Google reCAPTCHA v2 ★ -->
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body>
 
 <div class="container">
 
-  <!-- ── 頁首 ── -->
   <div class="header-card">
     <h1>🔍 鑑識勘察採證申請表</h1>
     <p>為有效並快速掌握現場狀況，請逐一如實填寫，以利安排鑑識人員出勤。標示 * 號為必填欄位。</p>
   </div>
 
-  <!-- ── 進度條 ── -->
   <div class="progress-bar">
     <div class="progress-fill" id="progressFill"></div>
   </div>
 
-  <!-- ── 個資告知聲明 ── -->
+  <!-- 個資告知聲明 -->
   <div class="form-card" id="consentScreen">
     <h2 class="consent-title">📋 個人資料蒐集告知聲明</h2>
     <div class="consent-body">
@@ -73,10 +66,9 @@
     <button id="consentBtn" class="submit-btn" disabled>同意並繼續填寫 →</button>
   </div>
 
-  <!-- ── 表單卡片 ── -->
+  <!-- 表單卡片 -->
   <div class="form-card" id="formCard" hidden>
 
-    <!-- 送出成功畫面 -->
     <div class="success-screen" id="successScreen">
       <div class="check-icon">✅</div>
       <h2>申請已送出！</h2>
@@ -84,7 +76,6 @@
       <p id="dutyOfficerMsg" class="duty-highlight"></p>
     </div>
 
-    <!-- 問卷主體 -->
     <form id="surveyForm" novalidate>
 
       <!-- 1. 申請人姓名 -->
@@ -104,16 +95,22 @@
       <!-- 3. 駐地單位 -->
       <div class="question-block" data-required>
         <label>3. 駐地單位 <span class="required">*</span></label>
-        <input type="text" name="unit"
-               placeholder="例：大園所、交通分隊" />
+        <input type="text" name="unit" placeholder="例：大園所、交通分隊" />
+        <span class="error-msg">此欄位為必填</span>
+      </div>
+
+      <!-- 4. 現場地址 -->
+      <div class="question-block" data-required>
+        <label>4. 現場地址 <span class="required">*</span></label>
+        <input type="text" name="location" placeholder="例：桃園市大園區○○里○○路○○號" />
         <span class="error-msg">此欄位為必填</span>
       </div>
 
       <hr class="divider" />
 
-      <!-- 4. 案件類別 -->
+      <!-- 5. 案件類別 -->
       <div class="question-block" data-required>
-        <label>4. 鑑識支援案件類別 <span class="required">*</span></label>
+        <label>5. 鑑識支援案件類別 <span class="required">*</span></label>
         <div class="option-group" id="q4group">
           <label class="option-item">
             <input type="radio" name="source" value="死亡案" /> 死亡案
@@ -133,458 +130,271 @@
 
       <hr class="divider" />
 
-      <!-- ════════════════════════════
-           條件式題目：死亡案
-      ════════════════════════════ -->
+      <!-- ════ 條件式題目：死亡案 ════ -->
       <div id="cond-death" class="conditional-section" hidden>
 
         <div class="question-block" data-required>
-          <label>5. 死亡案現場狀況請勾選 <span class="required">*</span></label>
+          <label>6. 死亡案現場狀況請勾選 <span class="required">*</span></label>
           <p class="hint">請勾選所有符合現場狀況的項目（至少一項）</p>
           <div class="option-group">
-            <label class="option-item">
-              <input type="checkbox" name="interests" value="死者與家人同住" />
-              死者與家人同住
-            </label>
-            <label class="option-item">
-              <input type="checkbox" name="interests" value="死者由家人發現" />
-              死者由家人發現
-            </label>
-            <label class="option-item">
-              <input type="checkbox" name="interests" value="死者身分可以確認" />
-              死者身分可以確認
-            </label>
-            <label class="option-item">
-              <input type="checkbox" name="interests" value="死者有病史（現場有藥袋、處方籤）" />
-              死者有病史（現場有藥袋、處方籤）
-            </label>
-            <label class="option-item">
-              <input type="checkbox" name="interests" value="現場擺設整齊，未發現打鬥痕跡" />
-              現場擺設整齊，未發現打鬥痕跡
-            </label>
-            <label class="option-item">
-              <input type="checkbox" name="interests" value="死者大體（臉部、頭部、頸部、四肢）未發現明顯傷勢" />
-              死者大體（臉部、頭部、頸部、四肢）未發現明顯傷勢
-            </label>
-            <label class="option-item">
-              <input type="checkbox" name="interests" value="現場未發現明顯血跡" />
-              現場未發現明顯血跡
-            </label>
-            <label class="option-item">
-              <input type="checkbox" name="interests" value="家屬對死者死因初步沒有意見" />
-              家屬對死者死因初步沒有意見
-            </label>
+            <label class="option-item"><input type="checkbox" name="interests" value="死者與家人同住" /> 死者與家人同住</label>
+            <label class="option-item"><input type="checkbox" name="interests" value="死者由家人發現" /> 死者由家人發現</label>
+            <label class="option-item"><input type="checkbox" name="interests" value="死者身分可以確認" /> 死者身分可以確認</label>
+            <label class="option-item"><input type="checkbox" name="interests" value="死者有病史（現場有藥袋、處方籤）" /> 死者有病史（現場有藥袋、處方籤）</label>
+            <label class="option-item"><input type="checkbox" name="interests" value="現場擺設整齊，未發現打鬥痕跡" /> 現場擺設整齊，未發現打鬥痕跡</label>
+            <label class="option-item"><input type="checkbox" name="interests" value="死者大體（臉部、頭部、頸部、四肢）未發現明顯傷勢" /> 死者大體（臉部、頭部、頸部、四肢）未發現明顯傷勢</label>
+            <label class="option-item"><input type="checkbox" name="interests" value="現場未發現明顯血跡" /> 現場未發現明顯血跡</label>
+            <label class="option-item"><input type="checkbox" name="interests" value="家屬對死者死因初步沒有意見" /> 家屬對死者死因初步沒有意見</label>
           </div>
           <span class="error-msg">請至少勾選一項</span>
         </div>
 
-        <!-- Q6 死亡方式 -->
         <div class="question-block" data-required>
-          <label>6. 本案死者死亡方式 <span class="required">*</span></label>
+          <label>7. 本案死者死亡方式 <span class="required">*</span></label>
           <div class="option-group">
-            <label class="option-item">
-              <input type="radio" name="death_method" value="疑為自殺" /> 疑為自殺
-            </label>
-            <label class="option-item">
-              <input type="radio" name="death_method" value="疑為意外" /> 疑為意外
-            </label>
-            <label class="option-item">
-              <input type="radio" name="death_method" value="疑為疾病" /> 疑為疾病
-            </label>
-            <label class="option-item">
-              <input type="radio" name="death_method" value="疑為外力" /> 疑為外力
-            </label>
-            <label class="option-item">
-              <input type="radio" name="death_method" value="無法辨識" /> 無法辨識
-            </label>
+            <label class="option-item"><input type="radio" name="death_method" value="疑為自殺" /> 疑為自殺</label>
+            <label class="option-item"><input type="radio" name="death_method" value="疑為意外" /> 疑為意外</label>
+            <label class="option-item"><input type="radio" name="death_method" value="疑為疾病" /> 疑為疾病</label>
+            <label class="option-item"><input type="radio" name="death_method" value="疑為外力" /> 疑為外力</label>
+            <label class="option-item"><input type="radio" name="death_method" value="無法辨識" /> 無法辨識</label>
           </div>
           <span class="error-msg">請選擇一項</span>
         </div>
 
-        <!-- Q7 性別 -->
         <div class="question-block" data-required>
-          <label>7. 死者性別 <span class="required">*</span></label>
+          <label>8. 死者性別 <span class="required">*</span></label>
           <div class="option-group">
-            <label class="option-item">
-              <input type="radio" name="death_gender" value="男性" /> 男性
-            </label>
-            <label class="option-item">
-              <input type="radio" name="death_gender" value="女性" /> 女性
-            </label>
-            <label class="option-item">
-              <input type="radio" name="death_gender" value="無法辨識" /> 無法辨識
-            </label>
+            <label class="option-item"><input type="radio" name="death_gender" value="男性" /> 男性</label>
+            <label class="option-item"><input type="radio" name="death_gender" value="女性" /> 女性</label>
+            <label class="option-item"><input type="radio" name="death_gender" value="無法辨識" /> 無法辨識</label>
           </div>
           <span class="error-msg">請選擇一項</span>
         </div>
 
-        <!-- Q8 出生年份 -->
         <div class="question-block" data-required>
-          <label>8. 死者出生年份 <span class="required">*</span></label>
+          <label>9. 死者出生年份 <span class="required">*</span></label>
           <input type="text" id="birth-death" name="victim_birth_year" placeholder="例：1985" />
           <span class="error-msg">此欄位為必填</span>
         </div>
 
-        <!-- Q9 國籍 -->
         <div class="question-block" data-required>
-          <label>9. 死者國籍 <span class="required">*</span></label>
+          <label>10. 死者國籍 <span class="required">*</span></label>
           <div class="option-group">
-            <label class="option-item">
-              <input type="radio" name="death_nationality" value="本國籍" /> 本國籍
-            </label>
-            <label class="option-item">
-              <input type="radio" name="death_nationality" value="非本國籍" /> 非本國籍
-            </label>
-            <label class="option-item">
-              <input type="radio" name="death_nationality" value="無法確認" /> 無法確認
-            </label>
+            <label class="option-item"><input type="radio" name="death_nationality" value="本國籍" /> 本國籍</label>
+            <label class="option-item"><input type="radio" name="death_nationality" value="非本國籍" /> 非本國籍</label>
+            <label class="option-item"><input type="radio" name="death_nationality" value="無法確認" /> 無法確認</label>
           </div>
           <span class="error-msg">請選擇一項</span>
         </div>
 
-        <!-- Q10 涉嫌人 -->
         <div class="question-block" data-required>
-          <label>10. 本案有無涉嫌人 <span class="required">*</span></label>
+          <label>11. 本案有無涉嫌人 <span class="required">*</span></label>
           <div class="option-group">
-            <label class="option-item">
-              <input type="radio" name="death_suspect" value="有" /> 有
-            </label>
-            <label class="option-item">
-              <input type="radio" name="death_suspect" value="無" /> 無
-            </label>
-            <label class="option-item">
-              <input type="radio" name="death_suspect" value="無法確定" /> 無法確定
-            </label>
+            <label class="option-item"><input type="radio" name="death_suspect" value="有" /> 有</label>
+            <label class="option-item"><input type="radio" name="death_suspect" value="無" /> 無</label>
+            <label class="option-item"><input type="radio" name="death_suspect" value="無法確定" /> 無法確定</label>
           </div>
           <span class="error-msg">請選擇一項</span>
         </div>
 
-        <!-- Q11 其他 -->
         <div class="question-block">
-          <label>11. 是否有其他現場情形需要描述？</label>
-          <textarea id="q10-death" name="q10"
-                    placeholder="請填寫其他需補充說明之事項…" rows="3"></textarea>
+          <label>12. 是否有其他現場情形需要描述？</label>
+          <textarea id="q10-death" name="q10" placeholder="請填寫其他需補充說明之事項…" rows="3"></textarea>
         </div>
 
       </div><!-- /cond-death -->
 
 
-      <!-- ════════════════════════════
-           條件式題目：聚眾鬥毆
-      ════════════════════════════ -->
+      <!-- ════ 條件式題目：聚眾鬥毆 ════ -->
       <div id="cond-fight" class="conditional-section" hidden>
 
         <div class="question-block" data-required>
-          <label>5. 聚眾鬥毆案現場狀況請勾選 <span class="required">*</span></label>
+          <label>6. 聚眾鬥毆案現場狀況請勾選 <span class="required">*</span></label>
           <p class="hint">請勾選所有符合現場狀況的項目（至少一項）</p>
           <div class="option-group">
-            <label class="option-item">
-              <input type="checkbox" name="interests" value="現場傷者已經送醫治療" />
-              現場傷者已經送醫治療
-            </label>
-            <label class="option-item">
-              <input type="checkbox" name="interests" value="現場傷者可能有生命危險" />
-              現場傷者可能有生命危險
-            </label>
-            <label class="option-item">
-              <input type="checkbox" name="interests" value="現場傷者意識清楚，傷勢已包紮，可製作筆錄" />
-              現場傷者意識清楚，傷勢已包紮，可製作筆錄
-            </label>
-            <label class="option-item">
-              <input type="checkbox" name="interests" value="現場兇手已經抓到，並已坦承犯案" />
-              現場兇手已經抓到，並已坦承犯案
-            </label>
-            <label class="option-item">
-              <input type="checkbox" name="interests" value="現場案發經過有監視器影像" />
-              現場案發經過有監視器影像
-            </label>
-            <label class="option-item">
-              <input type="checkbox" name="interests" value="現場案發經過有第三人目擊，可以提供案發經過" />
-              現場案發經過有第三人目擊，可以提供案發經過
-            </label>
-            <label class="option-item">
-              <input type="checkbox" name="interests" value="現場凶器已經找到，並妥善保管" />
-              現場凶器已經找到，並妥善保管
-            </label>
+            <label class="option-item"><input type="checkbox" name="interests" value="現場傷者已經送醫治療" /> 現場傷者已經送醫治療</label>
+            <label class="option-item"><input type="checkbox" name="interests" value="現場傷者可能有生命危險" /> 現場傷者可能有生命危險</label>
+            <label class="option-item"><input type="checkbox" name="interests" value="現場傷者意識清楚，傷勢已包紮，可製作筆錄" /> 現場傷者意識清楚，傷勢已包紮，可製作筆錄</label>
+            <label class="option-item"><input type="checkbox" name="interests" value="現場兇手已經抓到，並已坦承犯案" /> 現場兇手已經抓到，並已坦承犯案</label>
+            <label class="option-item"><input type="checkbox" name="interests" value="現場案發經過有監視器影像" /> 現場案發經過有監視器影像</label>
+            <label class="option-item"><input type="checkbox" name="interests" value="現場案發經過有第三人目擊，可以提供案發經過" /> 現場案發經過有第三人目擊，可以提供案發經過</label>
+            <label class="option-item"><input type="checkbox" name="interests" value="現場凶器已經找到，並妥善保管" /> 現場凶器已經找到，並妥善保管</label>
           </div>
           <span class="error-msg">請至少勾選一項</span>
         </div>
 
-        <!-- Q6 性別 -->
         <div class="question-block" data-required>
-          <label>6. 被害人（死者/傷者）性別 <span class="required">*</span></label>
+          <label>7. 被害人（死者/傷者）性別 <span class="required">*</span></label>
           <div class="option-group">
-            <label class="option-item">
-              <input type="radio" name="fight_gender" value="男性" /> 男性
-            </label>
-            <label class="option-item">
-              <input type="radio" name="fight_gender" value="女性" /> 女性
-            </label>
-            <label class="option-item">
-              <input type="radio" name="fight_gender" value="無法辨識" /> 無法辨識
-            </label>
+            <label class="option-item"><input type="radio" name="fight_gender" value="男性" /> 男性</label>
+            <label class="option-item"><input type="radio" name="fight_gender" value="女性" /> 女性</label>
+            <label class="option-item"><input type="radio" name="fight_gender" value="無法辨識" /> 無法辨識</label>
           </div>
           <span class="error-msg">請選擇一項</span>
         </div>
 
-        <!-- Q7 出生年份 -->
         <div class="question-block" data-required>
-          <label>7. 被害人（死者/傷者）出生年份 <span class="required">*</span></label>
+          <label>8. 被害人（死者/傷者）出生年份 <span class="required">*</span></label>
           <input type="text" id="birth-fight" name="victim_birth_year" placeholder="例：1985" />
           <span class="error-msg">此欄位為必填</span>
         </div>
 
-        <!-- Q8 國籍 -->
         <div class="question-block" data-required>
-          <label>8. 被害人（死者/傷者）國籍 <span class="required">*</span></label>
+          <label>9. 被害人（死者/傷者）國籍 <span class="required">*</span></label>
           <div class="option-group">
-            <label class="option-item">
-              <input type="radio" name="fight_nationality" value="本國籍" /> 本國籍
-            </label>
-            <label class="option-item">
-              <input type="radio" name="fight_nationality" value="非本國籍" /> 非本國籍
-            </label>
-            <label class="option-item">
-              <input type="radio" name="fight_nationality" value="無法確認" /> 無法確認
-            </label>
+            <label class="option-item"><input type="radio" name="fight_nationality" value="本國籍" /> 本國籍</label>
+            <label class="option-item"><input type="radio" name="fight_nationality" value="非本國籍" /> 非本國籍</label>
+            <label class="option-item"><input type="radio" name="fight_nationality" value="無法確認" /> 無法確認</label>
           </div>
           <span class="error-msg">請選擇一項</span>
         </div>
 
-        <!-- Q9 涉嫌人 -->
         <div class="question-block" data-required>
-          <label>9. 本案是否掌握可疑涉嫌人(或被害人提供可疑對象) <span class="required">*</span></label>
+          <label>10. 本案是否掌握可疑涉嫌人(或被害人提供可疑對象) <span class="required">*</span></label>
           <div class="option-group">
-            <label class="option-item">
-              <input type="radio" name="fight_suspect" value="有" /> 有
-            </label>
-            <label class="option-item">
-              <input type="radio" name="fight_suspect" value="無" /> 無
-            </label>
-            <label class="option-item">
-              <input type="radio" name="fight_suspect" value="無法確定" /> 無法確定
-            </label>
+            <label class="option-item"><input type="radio" name="fight_suspect" value="有" /> 有</label>
+            <label class="option-item"><input type="radio" name="fight_suspect" value="無" /> 無</label>
+            <label class="option-item"><input type="radio" name="fight_suspect" value="無法確定" /> 無法確定</label>
           </div>
           <span class="error-msg">請選擇一項</span>
         </div>
 
-        <!-- Q10 其他 -->
         <div class="question-block">
-          <label>10. 是否有其他現場情形需要描述？</label>
-          <textarea id="q10-fight" name="q10"
-                    placeholder="請填寫其他需補充說明之事項…" rows="3"></textarea>
+          <label>11. 是否有其他現場情形需要描述？</label>
+          <textarea id="q10-fight" name="q10" placeholder="請填寫其他需補充說明之事項…" rows="3"></textarea>
         </div>
 
       </div><!-- /cond-fight -->
 
 
-      <!-- ════════════════════════════
-           條件式題目：竊盜案
-      ════════════════════════════ -->
+      <!-- ════ 條件式題目：竊盜案 ════ -->
       <div id="cond-theft" class="conditional-section" hidden>
 
         <div class="question-block" data-required>
-          <label>5. 竊盜案現場狀況請勾選 <span class="required">*</span></label>
+          <label>6. 竊盜案現場狀況請勾選 <span class="required">*</span></label>
           <p class="hint">請勾選所有符合現場狀況的項目（至少一項）</p>
           <div class="option-group">
-            <label class="option-item">
-              <input type="checkbox" name="interests" value="本案現場特殊，無法保留至翌日" />
-              本案現場特殊，無法保留至翌日
-            </label>
-            <label class="option-item">
-              <input type="checkbox" name="interests" value="本案被害人有緊急事由，無法等候至翌日" />
-              本案被害人有緊急事由，無法等候至翌日
-            </label>
-            <label class="option-item">
-              <input type="checkbox" name="interests" value="本案被害人為長官請託或其他特殊人士" />
-              本案被害人為長官請託或其他特殊人士
-            </label>
+            <label class="option-item"><input type="checkbox" name="interests" value="本案現場特殊，無法保留至翌日" /> 本案現場特殊，無法保留至翌日</label>
+            <label class="option-item"><input type="checkbox" name="interests" value="本案被害人有緊急事由，無法等候至翌日" /> 本案被害人有緊急事由，無法等候至翌日</label>
+            <label class="option-item"><input type="checkbox" name="interests" value="本案被害人為長官請託或其他特殊人士" /> 本案被害人為長官請託或其他特殊人士</label>
           </div>
           <span class="error-msg">請至少勾選一項</span>
         </div>
 
-        <!-- Q6 性別 -->
         <div class="question-block" data-required>
-          <label>6. 被害人性別 <span class="required">*</span></label>
+          <label>7. 被害人性別 <span class="required">*</span></label>
           <div class="option-group">
-            <label class="option-item">
-              <input type="radio" name="theft_gender" value="男性" /> 男性
-            </label>
-            <label class="option-item">
-              <input type="radio" name="theft_gender" value="女性" /> 女性
-            </label>
-            <label class="option-item">
-              <input type="radio" name="theft_gender" value="無法辨識" /> 無法辨識
-            </label>
+            <label class="option-item"><input type="radio" name="theft_gender" value="男性" /> 男性</label>
+            <label class="option-item"><input type="radio" name="theft_gender" value="女性" /> 女性</label>
+            <label class="option-item"><input type="radio" name="theft_gender" value="無法辨識" /> 無法辨識</label>
           </div>
           <span class="error-msg">請選擇一項</span>
         </div>
 
-        <!-- Q7 出生年份 -->
         <div class="question-block" data-required>
-          <label>7. 被害人出生年份 <span class="required">*</span></label>
+          <label>8. 被害人出生年份 <span class="required">*</span></label>
           <input type="text" id="birth-theft" name="victim_birth_year" placeholder="例：1985" />
           <span class="error-msg">此欄位為必填</span>
         </div>
 
-        <!-- Q8 國籍 -->
         <div class="question-block" data-required>
-          <label>8. 被害人國籍 <span class="required">*</span></label>
+          <label>9. 被害人國籍 <span class="required">*</span></label>
           <div class="option-group">
-            <label class="option-item">
-              <input type="radio" name="theft_nationality" value="本國籍" /> 本國籍
-            </label>
-            <label class="option-item">
-              <input type="radio" name="theft_nationality" value="非本國籍" /> 非本國籍
-            </label>
-            <label class="option-item">
-              <input type="radio" name="theft_nationality" value="無法確認" /> 無法確認
-            </label>
+            <label class="option-item"><input type="radio" name="theft_nationality" value="本國籍" /> 本國籍</label>
+            <label class="option-item"><input type="radio" name="theft_nationality" value="非本國籍" /> 非本國籍</label>
+            <label class="option-item"><input type="radio" name="theft_nationality" value="無法確認" /> 無法確認</label>
           </div>
           <span class="error-msg">請選擇一項</span>
         </div>
 
-        <!-- Q9 涉嫌人 -->
         <div class="question-block" data-required>
-          <label>9. 本案是否掌握可疑涉嫌人(或被害人提供可疑對象) <span class="required">*</span></label>
+          <label>10. 本案是否掌握可疑涉嫌人(或被害人提供可疑對象) <span class="required">*</span></label>
           <div class="option-group">
-            <label class="option-item">
-              <input type="radio" name="theft_suspect" value="有" /> 有
-            </label>
-            <label class="option-item">
-              <input type="radio" name="theft_suspect" value="無" /> 無
-            </label>
-            <label class="option-item">
-              <input type="radio" name="theft_suspect" value="無法確定" /> 無法確定
-            </label>
+            <label class="option-item"><input type="radio" name="theft_suspect" value="有" /> 有</label>
+            <label class="option-item"><input type="radio" name="theft_suspect" value="無" /> 無</label>
+            <label class="option-item"><input type="radio" name="theft_suspect" value="無法確定" /> 無法確定</label>
           </div>
           <span class="error-msg">請選擇一項</span>
         </div>
 
-        <!-- Q10 案情描述（必填） -->
         <div class="question-block" data-required>
-          <label>10. 竊盜案情描述 <span class="required">*</span></label>
+          <label>11. 竊盜案情描述 <span class="required">*</span></label>
           <p class="hint">請描述為何種竊盜案，以及需要鑑識採證之情形</p>
-          <textarea id="q10-theft" name="q10"
-                    placeholder="請填寫案件概況及採證需求…" rows="4"></textarea>
+          <textarea id="q10-theft" name="q10" placeholder="請填寫案件概況及採證需求…" rows="4"></textarea>
           <span class="error-msg">此欄位為必填</span>
         </div>
 
       </div><!-- /cond-theft -->
 
 
-      <!-- ════════════════════════════
-           條件式題目：其他
-      ════════════════════════════ -->
+      <!-- ════ 條件式題目：其他 ════ -->
       <div id="cond-other" class="conditional-section" hidden>
 
         <div class="question-block" data-required>
-          <label>5. 其他案件現場狀況請勾選 <span class="required">*</span></label>
+          <label>6. 其他案件現場狀況請勾選 <span class="required">*</span></label>
           <p class="hint">請勾選所有符合現場狀況的項目（至少一項）</p>
           <div class="option-group">
-            <label class="option-item">
-              <input type="checkbox" name="interests" value="本案為重大刑案（兇殺、強盜、槍擊或其他重大刑案）" />
-              本案為重大刑案（兇殺、強盜、槍擊或其他重大刑案）
-            </label>
-            <label class="option-item">
-              <input type="checkbox" name="interests" value="本案被害人受傷或死亡" />
-              本案被害人受傷或死亡
-            </label>
-            <label class="option-item">
-              <input type="checkbox" name="interests" value="本案現場為戶外，難以保留" />
-              本案現場為戶外，難以保留
-            </label>
-            <label class="option-item">
-              <input type="checkbox" name="interests" value="本案現場為室內，目前已封鎖現場" />
-              本案現場為室內，目前已封鎖現場
-            </label>
+            <label class="option-item"><input type="checkbox" name="interests" value="本案為重大刑案（兇殺、強盜、槍擊或其他重大刑案）" /> 本案為重大刑案（兇殺、強盜、槍擊或其他重大刑案）</label>
+            <label class="option-item"><input type="checkbox" name="interests" value="本案被害人受傷或死亡" /> 本案被害人受傷或死亡</label>
+            <label class="option-item"><input type="checkbox" name="interests" value="本案現場為戶外，難以保留" /> 本案現場為戶外，難以保留</label>
+            <label class="option-item"><input type="checkbox" name="interests" value="本案現場為室內，目前已封鎖現場" /> 本案現場為室內，目前已封鎖現場</label>
           </div>
           <span class="error-msg">請至少勾選一項</span>
         </div>
 
-        <!-- Q6 性別 -->
         <div class="question-block" data-required>
-          <label>6. 被害人（死者/傷者）性別 <span class="required">*</span></label>
+          <label>7. 被害人（死者/傷者）性別 <span class="required">*</span></label>
           <div class="option-group">
-            <label class="option-item">
-              <input type="radio" name="other_gender" value="男性" /> 男性
-            </label>
-            <label class="option-item">
-              <input type="radio" name="other_gender" value="女性" /> 女性
-            </label>
-            <label class="option-item">
-              <input type="radio" name="other_gender" value="無法辨識" /> 無法辨識
-            </label>
+            <label class="option-item"><input type="radio" name="other_gender" value="男性" /> 男性</label>
+            <label class="option-item"><input type="radio" name="other_gender" value="女性" /> 女性</label>
+            <label class="option-item"><input type="radio" name="other_gender" value="無法辨識" /> 無法辨識</label>
           </div>
           <span class="error-msg">請選擇一項</span>
         </div>
 
-        <!-- Q7 出生年份 -->
         <div class="question-block" data-required>
-          <label>7. 被害人（死者/傷者）出生年份 <span class="required">*</span></label>
+          <label>8. 被害人（死者/傷者）出生年份 <span class="required">*</span></label>
           <input type="text" id="birth-other" name="victim_birth_year" placeholder="例：1985" />
           <span class="error-msg">此欄位為必填</span>
         </div>
 
-        <!-- Q8 國籍 -->
         <div class="question-block" data-required>
-          <label>8. 被害人（死者/傷者）國籍 <span class="required">*</span></label>
+          <label>9. 被害人（死者/傷者）國籍 <span class="required">*</span></label>
           <div class="option-group">
-            <label class="option-item">
-              <input type="radio" name="other_nationality" value="本國籍" /> 本國籍
-            </label>
-            <label class="option-item">
-              <input type="radio" name="other_nationality" value="非本國籍" /> 非本國籍
-            </label>
-            <label class="option-item">
-              <input type="radio" name="other_nationality" value="無法確認" /> 無法確認
-            </label>
+            <label class="option-item"><input type="radio" name="other_nationality" value="本國籍" /> 本國籍</label>
+            <label class="option-item"><input type="radio" name="other_nationality" value="非本國籍" /> 非本國籍</label>
+            <label class="option-item"><input type="radio" name="other_nationality" value="無法確認" /> 無法確認</label>
           </div>
           <span class="error-msg">請選擇一項</span>
         </div>
 
-        <!-- Q9 涉嫌人 -->
         <div class="question-block" data-required>
-          <label>9. 本案是否掌握可疑涉嫌人(或被害人提供可疑對象) <span class="required">*</span></label>
+          <label>10. 本案是否掌握可疑涉嫌人(或被害人提供可疑對象) <span class="required">*</span></label>
           <div class="option-group">
-            <label class="option-item">
-              <input type="radio" name="other_suspect" value="有" /> 有
-            </label>
-            <label class="option-item">
-              <input type="radio" name="other_suspect" value="無" /> 無
-            </label>
-            <label class="option-item">
-              <input type="radio" name="other_suspect" value="無法確定" /> 無法確定
-            </label>
+            <label class="option-item"><input type="radio" name="other_suspect" value="有" /> 有</label>
+            <label class="option-item"><input type="radio" name="other_suspect" value="無" /> 無</label>
+            <label class="option-item"><input type="radio" name="other_suspect" value="無法確定" /> 無法確定</label>
           </div>
           <span class="error-msg">請選擇一項</span>
         </div>
 
-        <!-- Q10 案情描述（必填） -->
         <div class="question-block" data-required>
-          <label>10. 案件情況描述 <span class="required">*</span></label>
+          <label>11. 案件情況描述 <span class="required">*</span></label>
           <p class="hint">請簡述為何種案件，以及需要鑑識採證之情形</p>
-          <textarea id="q10-other" name="q10"
-                    placeholder="請填寫案件概況及採證需求…" rows="4"></textarea>
+          <textarea id="q10-other" name="q10" placeholder="請填寫案件概況及採證需求…" rows="4"></textarea>
           <span class="error-msg">此欄位為必填</span>
         </div>
 
       </div><!-- /cond-other -->
 
-      <!-- Honeypot（防機器人） -->
-      <input type="text" name="_gotcha" style="display:none"
-             tabindex="-1" autocomplete="off" />
+      <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off" />
 
-      <!-- reCAPTCHA 驗證 -->
       <!-- reCAPTCHA Site Key 綁定 dayuanforensic.github.io -->
       <div class="captcha-wrap" id="captchaWrap">
-        <div class="g-recaptcha"
-             data-sitekey="6Lc_Ef8sAAAAAJ1yJIRgFSBM9JpSSILveT_D8ox9">
-        </div>
+        <div class="g-recaptcha" data-sitekey="6Lc_Ef8sAAAAAJ1yJIRgFSBM9JpSSILveT_D8ox9"></div>
         <span class="error-msg">請先完成「我不是機器人」驗證</span>
       </div>
 
-      <!-- 送出 -->
       <button type="submit" class="submit-btn" id="submitBtn">送出申請 →</button>
 
     </form>
@@ -599,28 +409,20 @@
 async function getTodayDutyOfficer() {
   const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Taipei' });
   const { data: cal } = await _sb
-    .from('shift_calendar')
-    .select('shift_number')
-    .eq('date', today)
-    .maybeSingle();
+    .from('shift_calendar').select('shift_number').eq('date', today).maybeSingle();
   if (!cal) return null;
   const { data: roster } = await _sb
-    .from('duty_roster')
-    .select('name, phone')
-    .eq('shift_number', cal.shift_number)
-    .maybeSingle();
+    .from('duty_roster').select('name, phone').eq('shift_number', cal.shift_number).maybeSingle();
   return roster;
 }
 
-// ── 同意書邏輯 ──
+// ── 同意書 ──
 const consentCheck  = document.getElementById('consentCheck');
 const consentBtn    = document.getElementById('consentBtn');
 const consentScreen = document.getElementById('consentScreen');
 const formCard      = document.getElementById('formCard');
 
-consentCheck.addEventListener('change', () => {
-  consentBtn.disabled = !consentCheck.checked;
-});
+consentCheck.addEventListener('change', () => { consentBtn.disabled = !consentCheck.checked; });
 consentBtn.addEventListener('click', () => {
   consentScreen.hidden = true;
   formCard.hidden = false;
@@ -637,7 +439,7 @@ const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
 });
 
-// ── 條件式區塊對應表 ──
+// ── 條件式區塊 ──
 const COND_MAP = {
   '死亡案':  'cond-death',
   '聚眾鬥毆': 'cond-fight',
@@ -645,10 +447,8 @@ const COND_MAP = {
   '其他':    'cond-other',
 };
 
-// ── Q4 切換條件式區塊 ──
 document.querySelectorAll('[name="source"]').forEach(radio => {
   radio.addEventListener('change', () => {
-    // 隱藏所有並清空
     Object.values(COND_MAP).forEach(id => {
       const el = document.getElementById(id);
       el.hidden = true;
@@ -659,23 +459,20 @@ document.querySelectorAll('[name="source"]').forEach(radio => {
       el.querySelectorAll('.option-item').forEach(i => i.classList.remove('selected'));
       el.querySelectorAll('.question-block').forEach(b => b.classList.remove('has-error'));
     });
-    // 顯示對應區塊
     const targetId = COND_MAP[radio.value];
     if (targetId) document.getElementById(targetId).hidden = false;
     updateProgress();
   });
 });
 
-// ── 選項高亮（單選 + 複選通用） ──
+// ── 選項高亮 ──
 document.addEventListener('change', (e) => {
   const input = e.target;
   if (input.type !== 'radio' && input.type !== 'checkbox') return;
   const item = input.closest('.option-item');
   if (!item) return;
   if (input.type === 'radio') {
-    item.closest('.option-group')
-        ?.querySelectorAll('.option-item')
-        .forEach(i => i.classList.remove('selected'));
+    item.closest('.option-group')?.querySelectorAll('.option-item').forEach(i => i.classList.remove('selected'));
   }
   item.classList.toggle('selected', input.checked);
   updateProgress();
@@ -684,24 +481,25 @@ document.addEventListener('change', (e) => {
 // ── 進度條 ──
 function countFilled() {
   let filled = 0;
-  let total  = 4; // Q1–Q4 四題基本必填
+  let total  = 5; // Q1–Q5 五題基本必填
 
   if (document.querySelector('[name="name"]').value.trim())      filled++;
   if (document.querySelector('[name="phone_num"]').value.trim()) filled++;
   if (document.querySelector('[name="unit"]').value.trim())      filled++;
+  if (document.querySelector('[name="location"]').value.trim())  filled++;
   if (document.querySelector('[name="source"]:checked'))         filled++;
 
   const activeSection = document.querySelector('.conditional-section:not([hidden])');
   if (activeSection) {
     const hasDeathMethod = !!activeSection.querySelector('[name="death_method"]');
-    total += hasDeathMethod ? 6 : 5; // 死亡案多一個死亡方式題
-    if (activeSection.querySelector('[name="interests"]:checked'))      filled++; // Q5
+    total += hasDeathMethod ? 6 : 5;
+    if (activeSection.querySelector('[name="interests"]:checked'))     filled++;
     if (hasDeathMethod &&
-        activeSection.querySelector('[name="death_method"]:checked'))   filled++; // Q6 死亡方式
-    if (activeSection.querySelector('[name$="_gender"]:checked'))       filled++;
-    if (activeSection.querySelector('[id^="birth-"]')?.value.trim())   filled++;
-    if (activeSection.querySelector('[name$="_nationality"]:checked'))  filled++;
-    if (activeSection.querySelector('[name$="_suspect"]:checked'))      filled++;
+        activeSection.querySelector('[name="death_method"]:checked'))  filled++;
+    if (activeSection.querySelector('[name$="_gender"]:checked'))      filled++;
+    if (activeSection.querySelector('[id^="birth-"]')?.value.trim())  filled++;
+    if (activeSection.querySelector('[name$="_nationality"]:checked')) filled++;
+    if (activeSection.querySelector('[name$="_suspect"]:checked'))     filled++;
   }
   return (filled / total) * 100;
 }
@@ -713,41 +511,89 @@ function updateProgress() {
 document.querySelectorAll('input:not([type="radio"]):not([type="checkbox"]), textarea')
   .forEach(el => el.addEventListener('input', updateProgress));
 
+// ── 格式驗證 ──
+function getFormatError(input) {
+  const v = input.value.trim();
+  const n = input.name;
+  if (n === 'name') {
+    if (v.length < 2)    return '姓名請至少填寫 2 個字';
+    if (/^\d+$/.test(v)) return '姓名不可全為數字';
+  }
+  if (n === 'phone_num') {
+    if (!/^09\d{2}[-\s]?\d{3}[-\s]?\d{3}$/.test(v))
+      return '手機號碼格式不正確（例：0912-345678）';
+  }
+  if (n === 'unit'     && v.length < 2) return '駐地單位請至少填寫 2 個字';
+  if (n === 'location' && v.length < 2) return '現場地址請至少填寫 2 個字';
+  if (n === 'victim_birth_year') {
+    if (!/^\d{4}$/.test(v)) return '請輸入 4 位數西元年份（例：1985）';
+    const y = +v;
+    if (y < 1900 || y > new Date().getFullYear()) return '年份範圍不合理';
+  }
+  return null;
+}
+
+// ── 即時格式驗證（離開欄位時） ──
+document.querySelectorAll('[name="name"],[name="phone_num"],[name="unit"],[name="location"],[name="victim_birth_year"]')
+  .forEach(input => {
+    input.addEventListener('blur', () => {
+      const block = input.closest('.question-block');
+      if (!block) return;
+      const v = input.value.trim();
+      if (!v) return; // 空白留給送出時驗證
+      const msg = getFormatError(input);
+      block.classList.remove('has-error');
+      if (msg) {
+        const errEl = block.querySelector('.error-msg');
+        if (errEl) errEl.textContent = msg;
+        block.classList.add('has-error');
+      }
+    });
+  });
+
 // ── 表單驗證 & 送出 ──
 document.getElementById('surveyForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  // Honeypot
   if (document.querySelector('[name="_gotcha"]').value !== '') return;
 
-  // 驗證：跳過隱藏區塊內的題目
   let valid = true;
   document.querySelectorAll('.question-block[data-required]').forEach(block => {
-    if (block.closest('[hidden]')) return; // 在隱藏區塊內 → 跳過
+    if (block.closest('[hidden]')) return;
 
     block.classList.remove('has-error');
-
+    const errEl    = block.querySelector('.error-msg');
     const textInput = block.querySelector('input[type="text"], input[type="tel"], textarea');
-    const radio     = block.querySelector('input[type="radio"]');
-    const checkbox  = block.querySelector('input[type="checkbox"]');
+    const radio    = block.querySelector('input[type="radio"]');
+    const checkbox = block.querySelector('input[type="checkbox"]');
 
-    if (textInput && !textInput.value.trim()) {
-      block.classList.add('has-error'); valid = false;
+    if (textInput) {
+      const v = textInput.value.trim();
+      if (!v) {
+        if (errEl) errEl.textContent = '此欄位為必填';
+        block.classList.add('has-error'); valid = false;
+      } else {
+        const msg = getFormatError(textInput);
+        if (msg) {
+          if (errEl) errEl.textContent = msg;
+          block.classList.add('has-error'); valid = false;
+        }
+      }
     } else if (radio && !block.querySelector('input[type="radio"]:checked')) {
+      if (errEl) errEl.textContent = '請選擇一項';
       block.classList.add('has-error'); valid = false;
     } else if (checkbox && !block.querySelector('input[type="checkbox"]:checked')) {
+      if (errEl) errEl.textContent = '請至少勾選一項';
       block.classList.add('has-error'); valid = false;
     }
   });
 
   if (!valid) {
-    document.querySelector('.has-error')
-      ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    document.querySelector('.has-error')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     return;
   }
 
-  // reCAPTCHA 驗證
-  const captchaWrap = document.getElementById('captchaWrap');
+  const captchaWrap  = document.getElementById('captchaWrap');
   const captchaToken = grecaptcha.getResponse();
   if (!captchaToken) {
     captchaWrap.classList.add('has-error');
@@ -756,18 +602,14 @@ document.getElementById('surveyForm').addEventListener('submit', async (e) => {
   }
   captchaWrap.classList.remove('has-error');
 
-  // 收集資料
   const form          = e.target;
   const caseType      = form.querySelector('[name="source"]:checked')?.value || null;
   const activeSection = document.querySelector('.conditional-section:not([hidden])');
 
-  // Q5 現場狀況勾選（interests 欄位，排除 death_method）
   const interests = activeSection
-    ? [...activeSection.querySelectorAll('[name="interests"]:checked')]
-        .map(cb => cb.value).join('、') || null
+    ? [...activeSection.querySelectorAll('[name="interests"]:checked')].map(cb => cb.value).join('、') || null
     : null;
 
-  // 被害人模糊資料
   const deathMethodValues = activeSection?.querySelector('[name="death_method"]:checked')?.value || '';
   const genderEl      = activeSection?.querySelector('[name$="_gender"]:checked');
   const birthEl       = activeSection?.querySelector('[id^="birth-"]');
@@ -776,27 +618,26 @@ document.getElementById('surveyForm').addEventListener('submit', async (e) => {
   const q10El         = activeSection?.querySelector('[id^="q10-"]');
 
   const victimInfo = [
-    deathMethodValues           ? `死亡方式：${deathMethodValues}`     : null,
-    genderEl                    ? `性別：${genderEl.value}`            : null,
-    birthEl?.value.trim()       ? `出生年份：${birthEl.value.trim()}`  : null,
-    nationalityEl               ? `國籍：${nationalityEl.value}`       : null,
-    suspectEl                   ? `涉嫌人：${suspectEl.value}`         : null,
+    deathMethodValues       ? `死亡方式：${deathMethodValues}`    : null,
+    genderEl                ? `性別：${genderEl.value}`           : null,
+    birthEl?.value.trim()   ? `出生年份：${birthEl.value.trim()}` : null,
+    nationalityEl           ? `國籍：${nationalityEl.value}`      : null,
+    suspectEl               ? `涉嫌人：${suspectEl.value}`        : null,
   ].filter(Boolean).join('\n');
 
   const q10 = q10El?.value.trim() || null;
-
   let suggestion = victimInfo || null;
-  if (q10) suggestion = (suggestion ? suggestion + '\n\n' : '') +
-                        '【其他情形 / 案情描述】\n' + q10;
+  if (q10) suggestion = (suggestion ? suggestion + '\n\n' : '') + '【其他情形 / 案情描述】\n' + q10;
 
   const payload = {
     name:         form.querySelector('[name="name"]').value.trim(),
-    email:        form.querySelector('[name="phone_num"]').value.trim(), // 手機→email欄
-    phone:        form.querySelector('[name="unit"]').value.trim(),      // 單位→phone欄
+    email:        form.querySelector('[name="phone_num"]').value.trim(),
+    phone:        form.querySelector('[name="unit"]').value.trim(),
     source:       caseType,
     interests:    interests,
     satisfaction: null,
     suggestion:   suggestion || null,
+    location:     form.querySelector('[name="location"]').value.trim() || null,
   };
 
   const btn = document.getElementById('submitBtn');
@@ -807,7 +648,6 @@ document.getElementById('surveyForm').addEventListener('submit', async (e) => {
 
   if (!error) {
     form.style.display = 'none';
-    // 查詢今日值班人員並更新成功訊息
     try {
       const duty = await getTodayDutyOfficer();
       const msgEl = document.getElementById('dutyOfficerMsg');
@@ -818,7 +658,7 @@ document.getElementById('surveyForm').addEventListener('submit', async (e) => {
       } else {
         msgEl.textContent = '您的申請已成功送出，請務必保持電話暢通，鑑識人員將確認後回覆。';
       }
-    } catch (_) { /* 查詢失敗時保留預設訊息 */ }
+    } catch (_) {}
     document.getElementById('successScreen').style.display = 'block';
     document.getElementById('progressFill').style.width = '100%';
   } else {
