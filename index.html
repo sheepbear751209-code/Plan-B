@@ -173,7 +173,7 @@
 
         <div class="question-block" data-required>
           <label>9. 死者出生年份 <span class="required">*</span></label>
-          <input type="text" id="birth-death" name="victim_birth_year" placeholder="例：1985" />
+          <input type="text" id="birth-death" name="victim_birth_year" placeholder="例：1985 或民國74年填74" />
           <span class="error-msg">此欄位為必填</span>
         </div>
 
@@ -235,7 +235,7 @@
 
         <div class="question-block" data-required>
           <label>8. 被害人（死者/傷者）出生年份 <span class="required">*</span></label>
-          <input type="text" id="birth-fight" name="victim_birth_year" placeholder="例：1985" />
+          <input type="text" id="birth-fight" name="victim_birth_year" placeholder="例：1985 或民國74年填74" />
           <span class="error-msg">此欄位為必填</span>
         </div>
 
@@ -293,7 +293,7 @@
 
         <div class="question-block" data-required>
           <label>8. 被害人出生年份 <span class="required">*</span></label>
-          <input type="text" id="birth-theft" name="victim_birth_year" placeholder="例：1985" />
+          <input type="text" id="birth-theft" name="victim_birth_year" placeholder="例：1985 或民國74年填74" />
           <span class="error-msg">此欄位為必填</span>
         </div>
 
@@ -354,7 +354,7 @@
 
         <div class="question-block" data-required>
           <label>8. 被害人（死者/傷者）出生年份 <span class="required">*</span></label>
-          <input type="text" id="birth-other" name="victim_birth_year" placeholder="例：1985" />
+          <input type="text" id="birth-other" name="victim_birth_year" placeholder="例：1985 或民國74年填74" />
           <span class="error-msg">此欄位為必填</span>
         </div>
 
@@ -526,9 +526,14 @@ function getFormatError(input) {
   if (n === 'unit'     && v.length < 2) return '駐地單位請至少填寫 2 個字';
   if (n === 'location' && v.length < 2) return '現場地址請至少填寫 2 個字';
   if (n === 'victim_birth_year') {
-    if (!/^\d{4}$/.test(v)) return '請輸入 4 位數西元年份（例：1985）';
+    if (!/^\d{2,4}$/.test(v)) return '請輸入西元年份（例：1985）或民國年份（例：74）';
     const y = +v;
-    if (y < 1900 || y > new Date().getFullYear()) return '年份範圍不合理';
+    if (v.length === 4) {
+      if (y < 1900 || y > new Date().getFullYear()) return '西元年份範圍不合理';
+    } else {
+      // 2–3 位視為民國年份
+      if (y < 1 || y > 130) return '民國年份範圍不合理';
+    }
   }
   return null;
 }
