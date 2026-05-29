@@ -276,8 +276,17 @@
       </div>
       <div class="field-group">
         <label>處理結果 <span class="required">*</span></label>
-        <textarea id="handlingResult" rows="3"
-          placeholder="說明本次如何處理，例如：已赴現場勘察，初步排除外力介入…"></textarea>
+        <div class="option-group" style="flex-direction:column;gap:8px;margin-top:.35rem;">
+          <label style="display:flex;align-items:center;gap:.6rem;cursor:pointer;padding:.55rem .85rem;border:1.5px solid var(--border);border-radius:8px;transition:border-color .15s;">
+            <input type="radio" name="handlingResultRadio" id="hrGo"   value="前往現場勘察"   style="accent-color:var(--primary);" onchange="syncHandlingResult()" />
+            <span style="font-size:.93rem;">前往現場勘察</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:.6rem;cursor:pointer;padding:.55rem .85rem;border:1.5px solid var(--border);border-radius:8px;transition:border-color .15s;">
+            <input type="radio" name="handlingResultRadio" id="hrDefer" value="暫緩現場勘察" style="accent-color:var(--primary);" onchange="syncHandlingResult()" />
+            <span style="font-size:.93rem;">暫緩現場勘察</span>
+          </label>
+        </div>
+        <input type="hidden" id="handlingResult" value="" />
       </div>
       <div class="field-group">
         <label>案件摘要 <span class="required">*</span></label>
@@ -732,6 +741,11 @@ ${victimLine !== '（請填入）' ? `被害人情形：${victimLine}` : ''}
 職　　　謹陳`;
 }
 
+function syncHandlingResult() {
+  const checked = document.querySelector('[name="handlingResultRadio"]:checked');
+  document.getElementById('handlingResult').value = checked ? checked.value : '';
+}
+
 function insertPhrase(text) {
   const ta = document.getElementById('caseSummaryText');
   const s = ta.selectionStart, e = ta.selectionEnd, v = ta.value;
@@ -774,6 +788,7 @@ function showCloseCaseModal(id) {
   const sub = S.submissions.find(s => s.id === id);
   document.getElementById('handlerName').value    = '';
   document.getElementById('handlingResult').value = '';
+  document.querySelectorAll('[name="handlingResultRadio"]').forEach(r => r.checked = false);
   document.getElementById('caseSummaryText').value = sub ? buildTemplate(sub) : '';
   document.getElementById('phrasePanelContainer').innerHTML = '';
   if (sub?.source) renderPhrasePanel(sub.source);
