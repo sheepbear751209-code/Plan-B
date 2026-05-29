@@ -127,6 +127,75 @@ CREATE OR REPLACE TRIGGER trg_auto_close_submission
   FOR EACH ROW
   EXECUTE FUNCTION fn_auto_close_submission();
 
+-- ──────────────────────────────────────────────────────────
+-- 7. duty_roster：5 個值班番號的人員設定
+-- ──────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS duty_roster (
+  shift_number  SMALLINT PRIMARY KEY CHECK (shift_number BETWEEN 1 AND 5),
+  name          TEXT NOT NULL DEFAULT '',
+  phone         TEXT NOT NULL DEFAULT ''
+);
+
+-- 初始化 5 個番號（若已存在則不更動）
+INSERT INTO duty_roster (shift_number, name, phone)
+VALUES (1,'',''), (2,'',''), (3,'',''), (4,'',''), (5,'','')
+ON CONFLICT DO NOTHING;
+
+-- ──────────────────────────────────────────────────────────
+-- 8. shift_calendar：每日值班番號排班
+-- ──────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS shift_calendar (
+  date          DATE PRIMARY KEY,
+  shift_number  SMALLINT NOT NULL REFERENCES duty_roster(shift_number)
+);
+
+CREATE INDEX IF NOT EXISTS idx_shift_calendar_date
+  ON shift_calendar(date DESC);
+
+-- ──────────────────────────────────────────────────────────
+-- 9. 新表的 RLS
+-- ──────────────────────────────────────────────────────────
+ALTER TABLE duty_roster    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE shift_calendar ENABLE ROW LEVEL SECURITY;
+
+-- anon（C 端）可讀，查詢今日值班
+CREATE POLICY "anon_select_duty_roster"
+  ON duty_roster FOR SELECT TO anon USING (true);
+
+CREATE POLICY "anon_select_shift_calendar"
+  ON shift_calendar FOR SELECT TO anon USING (true);
+
+-- B 端（登入後）可完整操作
+CREATE POLICY "auth_all_duty_roster"
+  ON duty_roster FOR ALL TO authenticated
+  USING (true) WITH CHECK (true);
+
+CREATE POLICY "auth_all_shift_calendar"
+  ON shift_calendar FOR ALL TO authenticated
+  USING (true) WITH CHECK (true);
+
+-- ──────────────────────────────────────────────────────────
+-- 10. 角色權限（GRANT）
+--     RLS 政策只控制「哪些列可存取」，但 PostgreSQL 底層
+--     角色若無 GRANT 授權，請求在進入 RLS 之前就會被拒絕（403）
+-- ──────────────────────────────────────────────────────────
+
+-- 確保 schema 可被存取
+GRANT USAGE ON SCHEMA public TO anon;
+GRANT USAGE ON SCHEMA public TO authenticated;
+
+-- anon（C 端）：只需 INSERT submissions；讀 duty_roster / shift_calendar
+GRANT INSERT                    ON TABLE submissions      TO anon;
+GRANT SELECT                    ON TABLE duty_roster      TO anon;
+GRANT SELECT                    ON TABLE shift_calendar   TO anon;
+
+-- authenticated（B 端）：完整操作所有表
+GRANT SELECT, INSERT, UPDATE    ON TABLE submissions      TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE case_records TO authenticated;
+GRANT ALL                       ON TABLE duty_roster      TO authenticated;
+GRANT ALL                       ON TABLE shift_calendar   TO authenticated;
+
 -- ============================================================
--- 完成！可在 Supabase 控制台的 Table Editor 確認兩張資料表已建立。
+-- 完成！共 4 張資料表：submissions、case_records、
+--        duty_roster、shift_calendar
 -- ============================================================
