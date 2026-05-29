@@ -29,8 +29,9 @@
     <!-- 成功畫面（提交後顯示） -->
     <div class="success-screen" id="successScreen">
       <div class="check-icon">✅</div>
-      <h2>感謝您的填寫！</h2>
-      <p>您的回覆已成功送出，我們會盡快整理結果。</p>
+      <h2>申請已送出！</h2>
+      <p>請務必保持電話暢通，鑑識人員將確認後回覆。</p>
+      <p id="dutyOfficerMsg" class="duty-highlight"></p>
     </div>
 
     <!-- 問卷主體 -->
@@ -289,12 +290,30 @@ document.getElementById('surveyForm').addEventListener('submit', async (e) => {
     form.style.display = 'none';
     document.getElementById('successScreen').style.display = 'block';
     document.getElementById('progressFill').style.width = '100%';
+
+    const officer = await getTodayDutyOfficer();
+    const msgEl = document.getElementById('dutyOfficerMsg');
+    if (officer?.name) {
+      msgEl.innerHTML =
+        `您的申請已成功送出，今日鑑識值班人員為 <span class="duty-name">${officer.name}</span>` +
+        `，請直撥聯繫電話 <span class="duty-phone">${officer.phone}</span> 或偵查隊警用 3310。`;
+    } else {
+      msgEl.textContent = '您的申請已成功送出，請務必保持電話暢通，鑑識人員將確認後回覆。';
+    }
   } else {
     alert('送出失敗，請稍後再試。');
     btn.disabled = false;
     btn.textContent = '送出問卷 →';
   }
 });
+
+async function getTodayDutyOfficer() {
+  const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Taipei' });
+  const { data: cal } = await _sb.from('shift_calendar').select('shift_number').eq('date', today).maybeSingle();
+  if (!cal) return null;
+  const { data: roster } = await _sb.from('duty_roster').select('name, phone').eq('shift_number', cal.shift_number).maybeSingle();
+  return roster;
+}
 </script>
 
 </body>

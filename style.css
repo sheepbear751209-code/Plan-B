@@ -250,6 +250,21 @@ textarea {
   color: var(--muted);
 }
 
+.duty-highlight {
+  margin-top: 1.2rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #333;
+  line-height: 1.9;
+}
+
+.duty-highlight .duty-name,
+.duty-highlight .duty-phone {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #cc0000;
+}
+
 /* ===== 錯誤提示 ===== */
 .error-msg {
   font-size: .82rem;
