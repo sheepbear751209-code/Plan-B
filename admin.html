@@ -40,6 +40,16 @@
       .cal-cell { min-height: 54px; padding: 4px 2px; }
       .cal-select { font-size: .7rem; }
     }
+    /* ── 定型稿快速語句 ── */
+    .phrase-section { margin-top: 1rem; border-top: 1px solid var(--border); padding-top: .9rem; }
+    .phrase-label { font-size: .78rem; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; margin-bottom: .45rem; }
+    .phrase-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: .65rem; }
+    .phrase-chip { background: #f1f5f9; border: 1.5px solid var(--border); border-radius: 20px; padding: 3px 11px; font-size: .82rem; font-family: inherit; cursor: pointer; transition: background .15s, border-color .15s, color .15s; }
+    .phrase-chip:hover { background: #ede9fe; border-color: var(--primary); color: var(--primary); }
+    .custom-phrase-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .custom-phrase-input { padding: 5px 9px; border: 1.5px solid var(--border); border-radius: 6px; font-size: .82rem; font-family: inherit; transition: border-color .2s; cursor: pointer; }
+    .custom-phrase-input:focus { outline: none; border-color: var(--primary); cursor: text; }
+    .custom-phrase-input:hover:not(:focus) { border-color: var(--primary); background: #fafafe; }
   </style>
 </head>
 <body>
@@ -266,13 +276,15 @@
       </div>
       <div class="field-group">
         <label>處理結果 <span class="required">*</span></label>
-        <textarea id="handlingResult" rows="4"
-          placeholder="說明本次如何處理這筆回應，例如：已聯繫客戶並退款，客戶確認滿意…"></textarea>
+        <textarea id="handlingResult" rows="3"
+          placeholder="說明本次如何處理，例如：已赴現場勘察，初步排除外力介入…"></textarea>
       </div>
       <div class="field-group">
         <label>案件摘要 <span class="required">*</span></label>
-        <textarea id="caseSummaryText" rows="3"
-          placeholder="一到兩句簡短摘要，供其他成員快速了解此案況…"></textarea>
+        <textarea id="caseSummaryText" rows="18"
+          placeholder="點擊下方語句可帶入游標位置…" style="font-size:.85rem;line-height:1.7;font-family:inherit;"></textarea>
+        <!-- 快速語句面板 -->
+        <div id="phrasePanelContainer"></div>
       </div>
       <div class="modal-info">⏱ 結案時間將自動記錄為目前時間</div>
     </div>
@@ -618,12 +630,153 @@ function closeAllModals() {
   S.pendingId = null;
 }
 
+// ── 問卷選項（與 index.html 同步，若修改問卷請一併更新此處）──
+const CASE_OPTIONS = {
+  '死亡案':  ['死者與家人同住','死者由家人發現','死者身分可以確認','死者有病史（現場有藥袋、處方籤）','現場擺設整齊，未發現打鬥痕跡','死者大體（臉部、頭部、頸部、四肢）未發現明顯傷勢','現場未發現明顯血跡','家屬對死者死因初步沒有意見'],
+  '聚眾鬥毆':['現場傷者已經送醫治療','現場傷者可能有生命危險','現場傷者意識清楚，傷勢已包紮，可製作筆錄','現場兇手已經抓到，並已坦承犯案','現場案發經過有監視器影像','現場案發經過有第三人目擊，可以提供案發經過','現場凶器已經找到，並妥善保管'],
+  '竊盜案':  ['本案現場特殊，無法保留至翌日','本案被害人有緊急事由，無法等候至翌日','本案被害人為長官請託或其他特殊人士'],
+  '其他':    ['本案為重大刑案（兇殺、強盜、槍擊或其他重大刑案）','本案被害人受傷或死亡','本案現場為戶外，難以保留','本案現場為室內，目前已封鎖現場'],
+};
+
+function _parseSugg(s) {
+  const r = {};
+  (s || '').split('\n').forEach(l => { const i = l.indexOf('：'); if (i > -1) r[l.slice(0,i)] = l.slice(i+1); });
+  return r;
+}
+
+function buildTemplate(sub) {
+  const src = sub.source || '其他';
+  const interests = sub.interests || '（請填入）';
+  const p = _parseSugg(sub.suggestion);
+  const deathM  = p['死亡方式'] || '';
+  const gender  = p['性別']     || '';
+  const birth   = p['出生年份'] ? `出生年份 ${p['出生年份']}` : '';
+  const nation  = p['國籍']     || '';
+  const suspect = p['涉嫌人']   || '';
+  const victimParts = [gender, birth, nation, suspect ? `涉嫌人：${suspect}` : ''].filter(Boolean);
+  const victimLine  = victimParts.join('，') || '（請填入）';
+
+  const head = `案由：OO所轄內民眾疑似${src}現場勘察\n\n二、勘察時間：115年　月　日　時　分\n\n三、勘察地點：桃園市大園區\n\n四、案情摘要：\n`;
+
+  if (src === '死亡案') {
+    return head +
+`死者（${victimLine}）由關係人　　發現，隨即通知救護及警方到場。案經　　通知本隊鑑識小隊前往現場勘察，以協助釐清案情。
+
+五、勘察摘要：
+(一)現場狀況：${interests}
+(二)死亡方式：${deathM || '（請填入）'}
+(三)死者情形：${victimLine}
+(四)勘察結果：
+
+六、分析研判：
+(一)本案初步排除他殺之可能，詳細死因俟相驗後確認。
+(二)
+
+七、本案目前無媒體關注詢問。
+
+職　　　謹陳`;
+  }
+  if (src === '聚眾鬥毆') {
+    return head +
+`案經　　通知本隊鑑識小隊前往現場勘察，以協助釐清案情。
+被害人情形：${victimLine}
+
+五、勘察摘要：
+(一)現場狀況：${interests}
+(二)被害人情形：${victimLine}
+(三)涉嫌人情形：${suspect || '（請填入）'}
+(四)勘察結果：
+
+六、分析研判：
+(一)
+(二)
+
+七、本案目前無媒體關注詢問。
+
+職　　　謹陳`;
+  }
+  if (src === '竊盜案') {
+    return head +
+`被害人（${victimLine}）發現財物遭竊，隨即通報警方。案經　　通知本隊鑑識小隊前往現場採集跡證。
+${suspect ? `涉嫌人情形：${suspect}` : ''}
+
+五、勘察摘要：
+(一)現場狀況：${interests}
+(二)被害人情形：${victimLine}
+(三)涉嫌人掌握情形：${suspect || '（請填入）'}
+(四)勘察結果：
+
+六、分析研判：
+(一)
+(二)
+
+七、本案目前無媒體關注詢問。
+
+職　　　謹陳`;
+  }
+  return head +
+`案經　　通知本隊鑑識小隊前往現場勘察，以協助釐清案情。
+${victimLine !== '（請填入）' ? `被害人情形：${victimLine}` : ''}
+
+五、勘察摘要：
+(一)現場狀況：${interests}
+(二)被害人情形：${victimLine}
+(三)勘察結果：
+
+六、分析研判：
+(一)
+(二)
+
+七、本案目前無媒體關注詢問。
+
+職　　　謹陳`;
+}
+
+function insertPhrase(text) {
+  const ta = document.getElementById('caseSummaryText');
+  const s = ta.selectionStart, e = ta.selectionEnd, v = ta.value;
+  ta.value = v.slice(0, s) + text + v.slice(e);
+  ta.selectionStart = ta.selectionEnd = s + text.length;
+  ta.focus();
+}
+
+function saveCustomPhrases() {
+  const arr = [];
+  for (let i = 0; i < 10; i++) arr.push(document.getElementById('cp'+i)?.value || '');
+  localStorage.setItem('custom_phrases', JSON.stringify(arr));
+}
+
+function renderPhrasePanel(source) {
+  const opts = CASE_OPTIONS[source] || [];
+  const saved = JSON.parse(localStorage.getItem('custom_phrases') || JSON.stringify(Array(10).fill('')));
+  const esc = t => t.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+
+  let h = `<div class="phrase-section">`;
+  if (opts.length) {
+    h += `<div class="phrase-label">📋 問卷選項快速帶入</div><div class="phrase-chips">`;
+    opts.forEach(o => { h += `<button type="button" class="phrase-chip" onclick="insertPhrase('${esc(o)}')">${o}</button>`; });
+    h += `</div>`;
+  }
+  h += `<div class="phrase-label" style="margin-top:.6rem">✏️ 自訂語句（點一下帶入；修改後自動儲存）</div><div class="custom-phrase-grid">`;
+  for (let i = 0; i < 10; i++) {
+    const v = (saved[i] || '').replace(/"/g,'&quot;');
+    h += `<input type="text" id="cp${i}" class="custom-phrase-input" value="${v}" placeholder="自訂語句 ${i+1}"
+      onchange="saveCustomPhrases()"
+      onclick="const v=this.value.trim();if(v)insertPhrase(v)" />`;
+  }
+  h += `</div></div>`;
+  document.getElementById('phrasePanelContainer').innerHTML = h;
+}
+
 function showCloseCaseModal(id) {
   closeAllModals();
   S.pendingId = id;
-  document.getElementById('handlerName').value     = '';
-  document.getElementById('handlingResult').value  = '';
-  document.getElementById('caseSummaryText').value = '';
+  const sub = S.submissions.find(s => s.id === id);
+  document.getElementById('handlerName').value    = '';
+  document.getElementById('handlingResult').value = '';
+  document.getElementById('caseSummaryText').value = sub ? buildTemplate(sub) : '';
+  document.getElementById('phrasePanelContainer').innerHTML = '';
+  if (sub?.source) renderPhrasePanel(sub.source);
   document.getElementById('closeCaseModal').hidden = false;
 }
 
